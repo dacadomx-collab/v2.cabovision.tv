@@ -9,6 +9,7 @@
  * (data-sponsor-banner-id) y api/sponsors_redirect.php (clic contado server-side).
  */
 require_once __DIR__ . '/../../api/conexion.php';
+require_once __DIR__ . '/../../helpers/base_path.php';
 
 $placement = $placement ?? 'lateral';
 $banner    = null;
@@ -33,18 +34,19 @@ if ($banner === null) {
 ?>
 <div class="sponsor-slot sponsor-slot--<?= htmlspecialchars($placement, ENT_QUOTES, 'UTF-8') ?>">
     <span class="sponsor-slot__label">Publicidad</span>
-    <a href="/CaboVision.tv/api/sponsors_redirect.php?id=<?= (int) $banner['id'] ?>"
+    <a href="<?= base_path() ?>/api/sponsors_redirect.php?id=<?= (int) $banner['id'] ?>"
        target="_blank" rel="noopener sponsored"
        data-sponsor-banner-id="<?= (int) $banner['id'] ?>"
        data-viewability-threshold="0.5">
         <?php
         // sponsor_banners.image_path se guardó como ruta absoluta desde la raíz
-        // del dominio (ej. "/assets/img/ozuna.jpg"), pero este proyecto vive bajo
-        // /CaboVision.tv/ — sin el prefijo, el navegador pide la imagen un nivel
-        // arriba de donde realmente está (404 real, confirmado antes de este fix).
-        $bannerImageSrc = str_starts_with($banner['image_path'], '/CaboVision.tv/')
+        // del dominio (ej. "/assets/img/ozuna.jpg"), pero en XAMPP local este
+        // proyecto vive bajo /CaboVision.tv/ — sin ese prefijo, el navegador
+        // pide la imagen un nivel arriba de donde realmente está. base_path()
+        // resuelve el prefijo real del entorno (vacío en un dominio real).
+        $bannerImageSrc = str_starts_with($banner['image_path'], base_path() . '/')
             ? $banner['image_path']
-            : '/CaboVision.tv' . $banner['image_path'];
+            : base_path() . $banner['image_path'];
         ?>
         <img src="<?= htmlspecialchars($bannerImageSrc, ENT_QUOTES, 'UTF-8') ?>"
              alt="<?= htmlspecialchars($banner['sponsor_name'], ENT_QUOTES, 'UTF-8') ?>"

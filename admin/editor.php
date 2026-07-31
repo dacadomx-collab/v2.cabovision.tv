@@ -10,6 +10,7 @@ declare(strict_types=1);
 // =============================================================================
 
 require_once __DIR__ . '/../helpers/security_shield.php';
+require_once __DIR__ . '/../helpers/base_path.php';
 
 if (is_ip_banned()) {
     http_response_code(403);
@@ -23,7 +24,7 @@ waf_block_if_malicious();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Editor — CaboVision.tv</title>
-<link rel="icon" href="/CaboVision.tv/favicon.ico">
+<link rel="icon" href="<?= base_path() ?>/favicon.ico">
 <style><?= file_get_contents(__DIR__ . '/../assets/css/main.css') ?></style>
 <style>
     .admin-shell { max-width: 1100px; margin-inline: auto; padding: var(--space-md); }
@@ -78,10 +79,10 @@ waf_block_if_malicious();
     <div class="admin-topbar">
         <h1>Editor — Una Sola Pantalla</h1>
         <nav>
-            <a href="/CaboVision.tv/admin/editor.php" class="is-active">Editor</a>
-            <a href="/CaboVision.tv/admin/dashboard.php">Patrocinadores</a>
-            <a href="/CaboVision.tv/admin/sponsors_dashboard.php">Dashboard B2B</a>
-            <a href="/CaboVision.tv/admin/users.php">Usuarios</a>
+            <a href="<?= base_path() ?>/admin/editor.php" class="is-active">Editor</a>
+            <a href="<?= base_path() ?>/admin/dashboard.php">Patrocinadores</a>
+            <a href="<?= base_path() ?>/admin/sponsors_dashboard.php">Dashboard B2B</a>
+            <a href="<?= base_path() ?>/admin/users.php">Usuarios</a>
         </nav>
         <button type="button" id="logout-btn">Cerrar sesión</button>
     </div>
@@ -96,7 +97,7 @@ waf_block_if_malicious();
                 <div class="editor-field">
                     <label for="slug">Slug (URL)</label>
                     <input type="text" id="slug" name="slug" maxlength="255" placeholder="Se genera automáticamente del título">
-                    <div class="slug-preview">/CaboVision.tv/articulo.php?alias=<span id="slug-preview-text">…</span></div>
+                    <div class="slug-preview"><?= base_path() ?>/articulo.php?alias=<span id="slug-preview-text">…</span></div>
                 </div>
                 <div class="editor-field">
                     <label for="extract">Extracto (SEO / resumen)</label>
@@ -135,7 +136,7 @@ waf_block_if_malicious();
         <p id="article-feedback" hidden></p>
     </form>
 </div>
-<script src="/CaboVision.tv/assets/js/admin.js"></script>
-<script src="/CaboVision.tv/assets/js/editor.js" defer></script>
+<script src="<?= base_path() ?>/assets/js/admin.js"></script>
+<script src="<?= base_path() ?>/assets/js/editor.js" defer></script>
 </body>
 </html>

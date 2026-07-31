@@ -15,11 +15,12 @@ declare(strict_types=1);
 // =============================================================================
 
 require_once __DIR__ . '/../api/conexion.php';
+require_once __DIR__ . '/base_path.php';
 
 /** Ruta pública del logotipo de marca usado como fallback — única fuente de verdad. */
 function media_placeholder_path(): string
 {
-    return '/CaboVision.tv/assets/img/logocabovis_glow.png';
+    return base_path() . '/assets/img/logocabovis_glow.png';
 }
 
 /**
@@ -66,11 +67,11 @@ function resolve_media_path(?string $dbPath): string
     $absolute = dirname(__DIR__) . '/' . $relative;
 
     if (is_file($absolute)) {
-        return "/CaboVision.tv/{$relative}"; // Hot — camino más frecuente, sin tocar la BD
+        return base_path() . "/{$relative}"; // Hot — camino más frecuente, sin tocar la BD
     }
 
     if (media_lookup_tier($relative) === 'cold') {
-        return '/CaboVision.tv/api/media_bridge.php?path=' . rawurlencode($relative);
+        return base_path() . '/api/media_bridge.php?path=' . rawurlencode($relative);
     }
 
     return $placeholder; // ni en Hot ni registrado como Cold — comportamiento previo sin cambios

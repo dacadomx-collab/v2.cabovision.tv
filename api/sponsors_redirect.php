@@ -20,8 +20,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/../helpers/input_sanitizer.php';
+require_once __DIR__ . '/../helpers/base_path.php';
 
-const HOME_FALLBACK = '/CaboVision.tv/index.php';
+$homeFallback = base_path() . '/index.php';
 
 /**
  * Atribución UTM (2026-07-23, Growth Marketing — MODULO_04): cada clic
@@ -83,7 +84,7 @@ try {
 
     if ($bannerId <= 0) {
         logPerimetralIncident($pdo, 'invalid_key', $clientIp, $userSession);
-        header('Location: ' . HOME_FALLBACK, true, 302);
+        header('Location: ' . $homeFallback, true, 302);
         exit;
     }
 
@@ -101,7 +102,7 @@ try {
         // No existe, está pausado/finalizado, o fuera de vigencia — no es un
         // error de servidor, pero sí una anomalía perimetral a registrar.
         logPerimetralIncident($pdo, 'invalid_key', $clientIp, $userSession);
-        header('Location: ' . HOME_FALLBACK, true, 302);
+        header('Location: ' . $homeFallback, true, 302);
         exit;
     }
 
@@ -118,7 +119,7 @@ try {
     if (!is_string($destination) || filter_var($destination, FILTER_VALIDATE_URL) === false
         || !str_starts_with($destination, 'http://') && !str_starts_with($destination, 'https://')) {
         logPerimetralIncident($pdo, 'ad_fraud', $clientIp, $userSession);
-        header('Location: ' . HOME_FALLBACK, true, 302);
+        header('Location: ' . $homeFallback, true, 302);
         exit;
     }
 
@@ -128,6 +129,6 @@ try {
     exit;
 } catch (\PDOException $e) {
     error_log('[' . date('Y-m-d H:i:s') . '] [sponsors_redirect] ' . $e->getMessage());
-    header('Location: ' . HOME_FALLBACK, true, 302);
+    header('Location: ' . $homeFallback, true, 302);
     exit;
 }

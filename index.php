@@ -13,6 +13,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/api/conexion.php';
 require_once __DIR__ . '/helpers/input_sanitizer.php';
 require_once __DIR__ . '/helpers/security_shield.php';
+require_once __DIR__ . '/helpers/base_path.php';
 
 if (is_ip_banned()) {
     http_response_code(403);
@@ -73,10 +74,10 @@ require __DIR__ . '/views/partials/header.php';
 
         <nav class="arf-pagination" aria-label="Paginación de noticias">
             <?php if ($page > 1): ?>
-                <a href="/CaboVision.tv/index.php?page=<?= $page - 1 ?>">&larr; Anterior</a>
+                <a href="<?= base_path() ?>/index.php?page=<?= $page - 1 ?>">&larr; Anterior</a>
             <?php endif; ?>
             <?php if (count($articles) === PER_PAGE): ?>
-                <a href="/CaboVision.tv/index.php?page=<?= $page + 1 ?>">Siguiente &rarr;</a>
+                <a href="<?= base_path() ?>/index.php?page=<?= $page + 1 ?>">Siguiente &rarr;</a>
             <?php endif; ?>
         </nav>
     </div>

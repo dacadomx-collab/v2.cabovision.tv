@@ -10,6 +10,7 @@ declare(strict_types=1);
 // =============================================================================
 
 require_once __DIR__ . '/../helpers/security_shield.php';
+require_once __DIR__ . '/../helpers/base_path.php';
 
 if (is_ip_banned()) {
     http_response_code(403);
@@ -24,7 +25,7 @@ rate_limit_enforce('admin_page', 60, 60); // punto de entrada pre-autenticación
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Recuperar acceso — Panel CaboVision.tv</title>
-<link rel="icon" href="/CaboVision.tv/favicon.ico">
+<link rel="icon" href="<?= base_path() ?>/favicon.ico">
 <style><?= file_get_contents(__DIR__ . '/../assets/css/main.css') ?></style>
 <style>
     body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -57,7 +58,7 @@ rate_limit_enforce('admin_page', 60, 60); // punto de entrada pre-autenticación
             <button type="submit">Enviar enlace</button>
             <p id="recover-feedback" hidden></p>
         </form>
-        <a class="back-link" href="/CaboVision.tv/admin/login.php">← Volver al inicio de sesión</a>
+        <a class="back-link" href="<?= base_path() ?>/admin/login.php">← Volver al inicio de sesión</a>
     </div>
     <script>
         document.getElementById('recover-form').addEventListener('submit', async (event) => {
@@ -68,7 +69,7 @@ rate_limit_enforce('admin_page', 60, 60); // punto de entrada pre-autenticación
 
             button.disabled = true;
             try {
-                const response = await fetch('/CaboVision.tv/api/auth_recover.php', {
+                const response = await fetch('<?= base_path() ?>/api/auth_recover.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email }),

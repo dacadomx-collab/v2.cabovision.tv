@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../api/conexion.php';
 require_once __DIR__ . '/../helpers/media_path_resolver.php';
+require_once __DIR__ . '/../helpers/base_path.php';
 
 const MEDIA_TENANT_ID = 1002; // Misma constante que ColdStorageClient/link_articles_media.php
 
@@ -87,7 +88,7 @@ foreach ($stmt as $row) {
             continue; // no confirmado como subido de verdad — se deja intacto
         }
 
-        $bridgeUrl = '/CaboVision.tv/api/media_bridge.php?path=' . rawurlencode($cleanPath);
+        $bridgeUrl = base_path() . '/api/media_bridge.php?path=' . rawurlencode($cleanPath);
         $newImgTag = str_replace($imgPath, $bridgeUrl, $fullImgTag);
         if (!str_contains($newImgTag, 'loading=')) {
             $newImgTag = preg_replace('#<img\s#i', '<img loading="lazy" ', $newImgTag, 1) ?? $newImgTag;

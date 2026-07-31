@@ -23,6 +23,7 @@ require_once __DIR__ . '/jwt.php';
 require_once __DIR__ . '/auth_middleware.php'; // expone $authPayload, 401 si no hay token válido
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/../helpers/response.php';
+require_once __DIR__ . '/../helpers/base_path.php';
 require_once __DIR__ . '/../helpers/input_sanitizer.php';
 require_once __DIR__ . '/../helpers/asfl_logger.php';
 
@@ -76,7 +77,7 @@ try {
     send_success('Artículo publicado.', [
         'id'    => $articleId,
         'alias' => $article['alias'],
-        'url'   => '/CaboVision.tv/articulo.php?alias=' . urlencode((string) $article['alias']),
+        'url'   => base_path() . '/articulo.php?alias=' . urlencode((string) $article['alias']),
     ]);
 } catch (\PDOException $e) {
     // ── Capa 6: Try/Catch global — nunca se expone el error real de PDO al cliente ──

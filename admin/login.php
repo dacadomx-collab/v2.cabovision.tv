@@ -9,6 +9,7 @@ declare(strict_types=1);
 // =============================================================================
 
 require_once __DIR__ . '/../helpers/security_shield.php';
+require_once __DIR__ . '/../helpers/base_path.php';
 
 if (is_ip_banned()) {
     http_response_code(403);
@@ -23,7 +24,7 @@ rate_limit_enforce('admin_page', 60, 60); // punto de entrada pre-autenticación
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Acceso — Panel CaboVision.tv</title>
-<link rel="icon" href="/CaboVision.tv/favicon.ico">
+<link rel="icon" href="<?= base_path() ?>/favicon.ico">
 <style><?= file_get_contents(__DIR__ . '/../assets/css/main.css') ?></style>
 <style>
     body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -82,12 +83,12 @@ rate_limit_enforce('admin_page', 60, 60); // punto de entrada pre-autenticación
             </div>
             <div class="admin-login__aux">
                 <label><input type="checkbox" id="recordarme" name="recordarme"> Mantenerse registrado</label>
-                <a href="/CaboVision.tv/admin/recuperar.php">¿Olvidaste tu contraseña?</a>
+                <a href="<?= base_path() ?>/admin/recuperar.php">¿Olvidaste tu contraseña?</a>
             </div>
             <button type="submit">Entrar</button>
             <p id="login-error" hidden></p>
         </form>
     </div>
-    <script src="/CaboVision.tv/assets/js/admin.js"></script>
+    <script src="<?= base_path() ?>/assets/js/admin.js"></script>
 </body>
 </html>

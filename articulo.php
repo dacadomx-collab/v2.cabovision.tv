@@ -17,6 +17,7 @@ require_once __DIR__ . '/api/conexion.php';
 require_once __DIR__ . '/helpers/media.php';
 require_once __DIR__ . '/helpers/input_sanitizer.php';
 require_once __DIR__ . '/helpers/security_shield.php';
+require_once __DIR__ . '/helpers/base_path.php';
 
 if (is_ip_banned()) {
     http_response_code(403);
@@ -96,7 +97,7 @@ $isFallback = $heroImage === $mediaPlaceholder;
 // propio partial) — deben declararse ANTES de requerir header.php.
 $baseScheme      = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $baseUrl         = $baseScheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
-$canonicalUrl    = $baseUrl . '/CaboVision.tv/articulo.php?alias=' . urlencode($alias);
+$canonicalUrl    = $baseUrl . base_path() . '/articulo.php?alias=' . urlencode($alias);
 
 $pageTitle       = $article['title'] . ' — CaboVision.tv';
 $pageDescription = $article['extract'] !== null ? mb_substr(strip_tags((string) $article['extract']), 0, 160) : null;
@@ -104,7 +105,7 @@ $pageDescription = $article['extract'] !== null ? mb_substr(strip_tags((string) 
 // twitter:image usan el recorte "cover" exacto que exigen esas redes — la
 // <img> visible en pantalla ($heroImage, sin tocar) sigue mostrando la
 // imagen a su proporción real, nunca recortada.
-$pageImage       = !$isFallback ? $baseUrl . '/CaboVision.tv/api/og_image.php?path=' . rawurlencode((string) $heroRawPath) : null;
+$pageImage       = !$isFallback ? $baseUrl . base_path() . '/api/og_image.php?path=' . rawurlencode((string) $heroRawPath) : null;
 $pageUrl         = $canonicalUrl;
 
 // JSON-LD NewsArticle + BreadcrumbList en un solo @graph (Growth Marketing
@@ -127,7 +128,7 @@ $jsonLdGraph = [
             'publisher'      => [
                 '@type' => 'Organization',
                 'name'  => 'CaboVision.tv',
-                'logo'  => ['@type' => 'ImageObject', 'url' => $baseUrl . '/CaboVision.tv/assets/img/logocabovis_glow.png'],
+                'logo'  => ['@type' => 'ImageObject', 'url' => $baseUrl . base_path() . '/assets/img/logocabovis_glow.png'],
             ],
             'mainEntityOfPage' => $canonicalUrl,
             ...($pageImage !== null ? ['image' => [$pageImage]] : []),
@@ -137,8 +138,8 @@ $jsonLdGraph = [
             '@type'          => 'BreadcrumbList',
             '@id'            => $canonicalUrl . '#breadcrumb',
             'itemListElement' => [
-                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Inicio', 'item' => $baseUrl . '/CaboVision.tv/index.php'],
-                ['@type' => 'ListItem', 'position' => 2, 'name' => (string) $article['category_name'], 'item' => $baseUrl . '/CaboVision.tv/categoria.php?alias=' . urlencode((string) $article['category_alias'])],
+                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Inicio', 'item' => $baseUrl . base_path() . '/index.php'],
+                ['@type' => 'ListItem', 'position' => 2, 'name' => (string) $article['category_name'], 'item' => $baseUrl . base_path() . '/categoria.php?alias=' . urlencode((string) $article['category_alias'])],
                 ['@type' => 'ListItem', 'position' => 3, 'name' => $article['title']],
             ],
         ],
@@ -151,7 +152,7 @@ require __DIR__ . '/views/partials/header.php';
 
 <article class="arf-article">
     <p class="arf-article__category">
-        <a href="/CaboVision.tv/categoria.php?alias=<?= urlencode((string) $article['category_alias']) ?>">
+        <a href="<?= base_path() ?>/categoria.php?alias=<?= urlencode((string) $article['category_alias']) ?>">
             <?= htmlspecialchars((string) $article['category_name'], ENT_QUOTES, 'UTF-8') ?>
         </a>
     </p>

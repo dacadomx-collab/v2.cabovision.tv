@@ -15,6 +15,7 @@ declare(strict_types=1);
 // =============================================================================
 
 require_once __DIR__ . '/../helpers/security_shield.php';
+require_once __DIR__ . '/../helpers/base_path.php';
 
 if (is_ip_banned()) {
     http_response_code(403);
@@ -28,7 +29,7 @@ waf_block_if_malicious();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Restablecer contraseña — Panel CaboVision.tv</title>
-<link rel="icon" href="/CaboVision.tv/favicon.ico">
+<link rel="icon" href="<?= base_path() ?>/favicon.ico">
 <style><?= file_get_contents(__DIR__ . '/../assets/css/main.css') ?></style>
 <style>
     body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -160,7 +161,7 @@ waf_block_if_malicious();
 
             button.disabled = true;
             try {
-                const response = await fetch('/CaboVision.tv/api/auth_reset.php', {
+                const response = await fetch('<?= base_path() ?>/api/auth_reset.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, password }),
@@ -171,7 +172,7 @@ waf_block_if_malicious();
 
                 if (result.status === 'success') {
                     event.target.reset();
-                    setTimeout(() => { window.location.href = '/CaboVision.tv/admin/login.php'; }, 1800);
+                    setTimeout(() => { window.location.href = '<?= base_path() ?>/admin/login.php'; }, 1800);
                 }
             } catch {
                 feedbackEl.textContent = 'No se pudo contactar al servidor. Intenta de nuevo.';

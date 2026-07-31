@@ -18,8 +18,8 @@
 
     $ogTitle       = $pageTitle ?? 'CaboVision.tv — Noticias de Los Cabos y Baja California Sur';
     $ogDescription = $pageDescription ?? 'Noticias de Los Cabos y Baja California Sur en tiempo real.';
-    $ogImage       = $pageImage ?? ($_baseUrl . '/CaboVision.tv/assets/img/banner-cabovision.jpg');
-    $ogUrl         = $pageUrl ?? ($_baseUrl . ($_SERVER['REQUEST_URI'] ?? '/CaboVision.tv/index.php'));
+    $ogImage       = $pageImage ?? ($_baseUrl . base_path() . '/assets/img/banner-cabovision.jpg');
+    $ogUrl         = $pageUrl ?? ($_baseUrl . ($_SERVER['REQUEST_URI'] ?? (base_path() . '/index.php')));
     ?>
     <meta name="description" content="<?= htmlspecialchars($ogDescription, ENT_QUOTES, 'UTF-8') ?>">
     <link rel="canonical" href="<?= htmlspecialchars($ogUrl, ENT_QUOTES, 'UTF-8') ?>">
@@ -55,6 +55,7 @@
     require_once __DIR__ . '/../../api/conexion.php';
     require_once __DIR__ . '/../../helpers/input_sanitizer.php';
     require_once __DIR__ . '/../../helpers/object_cache.php';
+    require_once __DIR__ . '/../../helpers/base_path.php';
 
     $categoriesTopLevel = [];
     $mainMenuCurated = [];
@@ -163,7 +164,7 @@
     }
     ?>
 
-    <link rel="icon" href="/CaboVision.tv/favicon.ico">
+    <link rel="icon" href="<?= base_path() ?>/favicon.ico">
 
     <!--
         NOTA DE ARQUITECTURA — orden de cascada crítico, no accidental:
@@ -186,11 +187,11 @@
          el primer pintado) se difieren con preload+swap — no bloquean el
          render. Van PRIMERO en el DOM a propósito (ver nota de arriba: deben
          perder los empates de especificidad contra main.css). -->
-    <link rel="preload" href="/CaboVision.tv/assets/legacy/bootstrap.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="/CaboVision.tv/assets/legacy/app.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_path() ?>/assets/legacy/bootstrap.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_path() ?>/assets/legacy/app.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
-        <link rel="stylesheet" href="/CaboVision.tv/assets/legacy/bootstrap.css">
-        <link rel="stylesheet" href="/CaboVision.tv/assets/legacy/app.css">
+        <link rel="stylesheet" href="<?= base_path() ?>/assets/legacy/bootstrap.css">
+        <link rel="stylesheet" href="<?= base_path() ?>/assets/legacy/app.css">
     </noscript>
 
     <!-- Critical CSS inline: main.css (10 KB, nuestro sistema real de diseño)
@@ -229,25 +230,25 @@
                 <span></span>
                 <span></span>
                 <ul id="menu">
-                    <li><a href="/CaboVision.tv/index.php">Portada</a></li>
+                    <li><a href="<?= base_path() ?>/index.php">Portada</a></li>
                     <?php foreach ($mainMenuCurated as $entry): ?>
-                        <li><a href="/CaboVision.tv/categoria.php?alias=<?= urlencode($entry['category']['alias']) ?>"><?= htmlspecialchars($entry['category']['name'], ENT_QUOTES, 'UTF-8') ?></a></li>
+                        <li><a href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($entry['category']['alias']) ?>"><?= htmlspecialchars($entry['category']['name'], ENT_QUOTES, 'UTF-8') ?></a></li>
                         <?php foreach ($entry['children'] as $child): ?>
-                            <li><a href="/CaboVision.tv/categoria.php?alias=<?= urlencode($child['alias']) ?>">— <?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?></a></li>
+                            <li><a href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($child['alias']) ?>">— <?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?></a></li>
                         <?php endforeach; ?>
                     <?php endforeach; ?>
                     <?php if (!empty($losCabosALaCartaChildren)): ?>
                         <li><a href="#">Los Cabos a la Carta</a></li>
                         <?php foreach ($losCabosALaCartaChildren as $child): ?>
-                            <li><a href="/CaboVision.tv/categoria.php?alias=<?= urlencode($child['alias']) ?>">— <?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?></a></li>
+                            <li><a href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($child['alias']) ?>">— <?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?></a></li>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </ul>
             </div>
         </div>
         <div class="col-10 text-center">
-            <a href="/CaboVision.tv/index.php">
-                <img id="logoc" style="padding:10px;" width="400" height="74" src="/CaboVision.tv/assets/img/logocabovis_glow.png" alt="CaboVision.tv — Noticias de Los Cabos y Baja California Sur">
+            <a href="<?= base_path() ?>/index.php">
+                <img id="logoc" style="padding:10px;" width="400" height="74" src="<?= base_path() ?>/assets/img/logocabovis_glow.png" alt="CaboVision.tv — Noticias de Los Cabos y Baja California Sur">
             </a>
         </div>
     </div>
@@ -259,12 +260,12 @@
     <div class="gkPage">
         <div class="arf-grid arf-header-row">
             <div class="arf-col-2 invisible-xs" id="logocab">
-                <a href="/CaboVision.tv/index.php">
-                    <img src="/CaboVision.tv/assets/img/logocabovis_glow.png" alt="CaboVision.tv — Noticias de Los Cabos y Baja California Sur" width="400" height="74">
+                <a href="<?= base_path() ?>/index.php">
+                    <img src="<?= base_path() ?>/assets/img/logocabovis_glow.png" alt="CaboVision.tv — Noticias de Los Cabos y Baja California Sur" width="400" height="74">
                 </a>
             </div>
             <div class="arf-col-2" id="banner-top">
-                <img class="banner-cab" src="/CaboVision.tv/assets/img/banner-cabovision.jpg" alt="CaboVision.tv" width="1213" height="275">
+                <img class="banner-cab" src="<?= base_path() ?>/assets/img/banner-cabovision.jpg" alt="CaboVision.tv" width="1213" height="275">
             </div>
         </div>
     </div>
@@ -285,22 +286,22 @@
             <div class="collapse navbar-collapse w-100" id="main-menu-collapse">
                 <ul class="navbar-nav" id="main-nav">
                     <li class="nav-item active">
-                        <a class="nav-link" href="/CaboVision.tv/index.php">Portada</a>
+                        <a class="nav-link" href="<?= base_path() ?>/index.php">Portada</a>
                     </li>
                     <?php foreach ($mainMenuCurated as $entry): ?>
                         <?php $cat = $entry['category']; $children = $entry['children']; ?>
                         <?php if (empty($children)): ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="/CaboVision.tv/categoria.php?alias=<?= urlencode($cat['alias']) ?>"><?= htmlspecialchars($cat['name'], ENT_QUOTES, 'UTF-8') ?></a>
+                                <a class="nav-link" href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($cat['alias']) ?>"><?= htmlspecialchars($cat['name'], ENT_QUOTES, 'UTF-8') ?></a>
                             </li>
                         <?php else: ?>
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="/CaboVision.tv/categoria.php?alias=<?= urlencode($cat['alias']) ?>" role="button" aria-haspopup="true" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle" href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($cat['alias']) ?>" role="button" aria-haspopup="true" aria-expanded="false">
                                     <?= htmlspecialchars($cat['name'], ENT_QUOTES, 'UTF-8') ?>
                                 </a>
                                 <div class="dropdown-menu">
                                     <?php foreach ($children as $child): ?>
-                                        <a class="dropdown-item" href="/CaboVision.tv/categoria.php?alias=<?= urlencode($child['alias']) ?>"><?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?></a>
+                                        <a class="dropdown-item" href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($child['alias']) ?>"><?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?></a>
                                     <?php endforeach; ?>
                                 </div>
                             </li>
@@ -313,7 +314,7 @@
                             </a>
                             <div class="dropdown-menu">
                                 <?php foreach ($losCabosALaCartaChildren as $child): ?>
-                                    <a class="dropdown-item" href="/CaboVision.tv/categoria.php?alias=<?= urlencode($child['alias']) ?>"><?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?></a>
+                                    <a class="dropdown-item" href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($child['alias']) ?>"><?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?></a>
                                 <?php endforeach; ?>
                             </div>
                         </li>

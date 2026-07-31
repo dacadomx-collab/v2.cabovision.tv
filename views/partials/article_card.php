@@ -8,6 +8,7 @@
  *     Si la vista no la define, se asume false (comportamiento previo intacto).
  */
 require_once __DIR__ . '/../../helpers/media.php';
+require_once __DIR__ . '/../../helpers/base_path.php';
 $isPriorityCard = $isPriorityCard ?? false;
 $mediaPlaceholder = media_placeholder_path();
 $thumb = resolve_media_path($article['thumbnail'] ?? null) !== $mediaPlaceholder
@@ -16,7 +17,7 @@ $thumb = resolve_media_path($article['thumbnail'] ?? null) !== $mediaPlaceholder
 $isFallback = $thumb === $mediaPlaceholder;
 ?>
 <article class="card arf-col-3 article-card">
-    <a class="article-card__link" href="/CaboVision.tv/articulo.php?alias=<?= urlencode($article['alias']) ?>">
+    <a class="article-card__link" href="<?= base_path() ?>/articulo.php?alias=<?= urlencode($article['alias']) ?>">
         <div class="article-card__media<?= $isFallback ? ' article-card__media--fallback' : '' ?>">
             <?php if (!empty($article['featured'])): ?>
                 <span class="article-card__featured">Destacado</span>
