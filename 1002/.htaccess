@@ -4,36 +4,20 @@
 #             ({tenant_id}/{YYYY}/{MM}/{DD}/*.ext, ver api/media_bridge.php).
 #             Un atacante que logre subir un .php aquí NUNCA debe poder
 #             ejecutarlo — solo servirlo como bytes estáticos o 403.
+#
+# NOTA (2026-07-31): versión anterior con php_flag/SetHandler/ExecCGI causó
+# HTTP 500 en staging (PHP-FPM + AllowOverride restringido). Se simplifica
+# a la mínima directiva compatible con Apache 2.4 sin overrides riesgosos.
 # =============================================================================
 
-# Desactiva el motor PHP para cualquier archivo bajo este árbol, sin importar
-# la extensión con la que se haya subido (webshell.php, webshell.php.jpg, etc.)
-<IfModule mod_php.c>
-    php_flag engine off
-</IfModule>
-<IfModule mod_php7.c>
-    php_flag engine off
-</IfModule>
-<IfModule mod_php8.c>
-    php_flag engine off
-</IfModule>
-
-# Fallback para PHP-FPM / CGI donde mod_php no aplica: quita el handler y
-# fuerza texto plano en cualquier extensión ejecutable conocida.
-<FilesMatch "\.(php|php\d?|phtml|phar|pl|py|cgi|sh)$">
-    <IfModule mod_headers.c>
-        ForceType text/plain
-    </IfModule>
-    SetHandler none
-    SetHandler default-handler
-    <IfModule mod_authz_core.c>
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(php|php3|php4|php5|php7|php8|phtml|phar|cgi|pl)$">
         Require all denied
-    </IfModule>
-    <IfModule !mod_authz_core.c>
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(php|php3|php4|php5|php7|php8|phtml|phar|cgi|pl)$">
         Order allow,deny
         Deny from all
-    </IfModule>
-</FilesMatch>
-
-# Sin listados de directorio, sin ejecución de índices
-Options -Indexes -ExecCGI
+    </FilesMatch>
+</IfModule>
