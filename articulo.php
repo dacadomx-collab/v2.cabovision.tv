@@ -22,6 +22,8 @@ if (is_ip_banned()) {
     http_response_code(403);
     exit('Acceso denegado.');
 }
+waf_block_if_malicious();
+rate_limit_enforce('page', 120, 60); // 120 vistas/min por IP — generoso, no bloquea navegación real
 
 const STATUS_PUBLICADO = 1;
 

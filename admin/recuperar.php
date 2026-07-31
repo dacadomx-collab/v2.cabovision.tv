@@ -15,6 +15,8 @@ if (is_ip_banned()) {
     http_response_code(403);
     exit('Acceso denegado.');
 }
+waf_block_if_malicious();
+rate_limit_enforce('admin_page', 60, 60); // punto de entrada pre-autenticación, mas estricto que 'page'
 ?>
 <!DOCTYPE html>
 <html lang="es">

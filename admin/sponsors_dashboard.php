@@ -15,6 +15,7 @@ if (is_ip_banned()) {
     http_response_code(403);
     exit('Acceso denegado.');
 }
+waf_block_if_malicious();
 ?>
 <!DOCTYPE html>
 <html lang="es">
