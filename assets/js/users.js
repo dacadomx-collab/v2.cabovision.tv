@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadUsers() {
         try {
-            const response = await fetch('/CaboVision.tv/api/users_list.php', {
+            const response = await fetch(`${window.BASE_PATH}/api/users_list.php`, {
                 headers: { Authorization: `Bearer ${session.accessToken}` },
             });
             if (response.status === 401) {
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch('/CaboVision.tv/api/users_create.php', {
+            const response = await fetch(`${window.BASE_PATH}/api/users_create.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

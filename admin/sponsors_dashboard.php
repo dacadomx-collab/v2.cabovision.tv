@@ -25,6 +25,7 @@ waf_block_if_malicious();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard B2B — Patrocinadores | CaboVision.tv</title>
 <link rel="icon" href="<?= base_path() ?>/favicon.ico">
+<script>window.BASE_PATH = "<?= htmlspecialchars(base_path(), ENT_QUOTES, 'UTF-8') ?>";</script>
 <style><?= file_get_contents(__DIR__ . '/../assets/css/main.css') ?></style>
 <style>
     .admin-shell { max-width: 1100px; margin-inline: auto; padding: var(--space-md); }

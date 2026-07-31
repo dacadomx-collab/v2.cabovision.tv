@@ -21,7 +21,7 @@ function clearAuthSession() {
 
 function redirectToLogin() {
     clearAuthSession();
-    window.location.href = '/CaboVision.tv/admin/login.php';
+    window.location.href = `${window.BASE_PATH}/admin/login.php`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -67,7 +67,7 @@ function initLoginForm() {
         const recordarme = document.getElementById('recordarme')?.checked ?? false;
 
         try {
-            const response = await fetch('/CaboVision.tv/api/auth_login.php', {
+            const response = await fetch(`${window.BASE_PATH}/api/auth_login.php`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, recordarme }),
@@ -87,7 +87,7 @@ function initLoginForm() {
                 role: result.data.role,
             });
 
-            window.location.href = '/CaboVision.tv/admin/dashboard.php';
+            window.location.href = `${window.BASE_PATH}/admin/dashboard.php`;
         } catch {
             errorEl.textContent = 'No se pudo contactar al servidor.';
             errorEl.hidden = false;
@@ -127,7 +127,7 @@ function initSponsorPanel(session) {
 
     async function loadSponsors() {
         try {
-            const response = await fetch('/CaboVision.tv/api/sponsor_banners_list.php', {
+            const response = await fetch(`${window.BASE_PATH}/api/sponsor_banners_list.php`, {
                 headers: { 'Authorization': `Bearer ${session.accessToken}` },
             });
             if (response.status === 401) {
@@ -170,7 +170,7 @@ function initSponsorPanel(session) {
         };
 
         try {
-            const response = await fetch('/CaboVision.tv/api/sponsor_banners_create.php', {
+            const response = await fetch(`${window.BASE_PATH}/api/sponsor_banners_create.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ async function loadCategoriesSelect() {
     }
 
     try {
-        const response = await fetch('/CaboVision.tv/api/categories_list.php');
+        const response = await fetch(`${window.BASE_PATH}/api/categories_list.php`);
         const result = await response.json();
         if (result.status !== 'success') {
             return;

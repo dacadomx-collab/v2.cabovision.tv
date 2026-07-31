@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasta) params.set('hasta', hasta);
 
         try {
-            const response = await fetch(`/CaboVision.tv/api/sponsors_report.php?${params.toString()}`, {
+            const response = await fetch(`${window.BASE_PATH}/api/sponsors_report.php?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${session.accessToken}` },
             });
             if (response.status === 401) {

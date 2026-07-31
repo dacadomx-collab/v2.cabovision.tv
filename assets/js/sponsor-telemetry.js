@@ -17,7 +17,7 @@
 (function () {
     'use strict';
 
-    const TRACK_ENDPOINT = '/CaboVision.tv/api/sponsors_track.php';
+    const TRACK_ENDPOINT = (window.BASE_PATH + '/api/sponsors_track.php');
     const VIEWABILITY_MS = 1000; // 1 segundo continuo, MRC estándar
     const DEFAULT_THRESHOLD = 0.5;
 

@@ -47,7 +47,7 @@ function initAuraNLPContainer() {
         <div id="aura-nlp-bubble-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
             <!-- Hook de montaje de Gemini AI -->
             <div class="aura-ai-trigger" style="cursor: pointer; background: #10b981; padding: 15px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                <img src="/CaboVision.tv/assets/img/logocabovis_glow.png" style="width: 30px; height: 30px;" alt="AURA Core AI">
+                <img src="${window.BASE_PATH || ''}/assets/img/logocabovis_glow.png" style="width: 30px; height: 30px;" alt="AURA Core AI">
             </div>
         </div>
     `;

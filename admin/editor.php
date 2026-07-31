@@ -25,6 +25,7 @@ waf_block_if_malicious();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Editor — CaboVision.tv</title>
 <link rel="icon" href="<?= base_path() ?>/favicon.ico">
+<script>window.BASE_PATH = "<?= htmlspecialchars(base_path(), ENT_QUOTES, 'UTF-8') ?>";</script>
 <style><?= file_get_contents(__DIR__ . '/../assets/css/main.css') ?></style>
 <style>
     .admin-shell { max-width: 1100px; margin-inline: auto; padding: var(--space-md); }
@@ -72,6 +73,12 @@ waf_block_if_malicious();
         font-weight: 700; cursor: pointer;
     }
     .seo-note { font-size: 0.8rem; color: var(--color-text-muted); background: var(--color-bg-alt); border-left: 4px solid var(--color-text-muted); border-radius: 0.25rem; padding: 0.75rem 1rem; margin-top: var(--space-md); }
+
+    .recent-articles { margin-top: var(--space-lg); }
+    table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: var(--space-sm); }
+    table.admin-table th, table.admin-table td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+    table.admin-table th { color: var(--color-text-muted); text-transform: uppercase; font-size: 0.7rem; }
+    table.admin-table a.edit-link { color: var(--color-accent); font-weight: 600; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -135,6 +142,15 @@ waf_block_if_malicious();
         </div>
         <p id="article-feedback" hidden></p>
     </form>
+
+    <section class="recent-articles">
+        <h2>Notas recientes</h2>
+        <p style="font-size:0.85rem;color:var(--color-text-muted)">Para reemplazar la imagen de una nota ya publicada (o corregir texto), haz clic en "Editar".</p>
+        <table class="admin-table">
+            <thead><tr><th>Título</th><th>Categoría</th><th>Publicado</th><th></th></tr></thead>
+            <tbody id="recent-articles-body"><tr><td colspan="4">Cargando…</td></tr></tbody>
+        </table>
+    </section>
 </div>
 <script src="<?= base_path() ?>/assets/js/admin.js"></script>
 <script src="<?= base_path() ?>/assets/js/editor.js" defer></script>

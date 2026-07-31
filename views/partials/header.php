@@ -162,6 +162,30 @@
         error_log('[' . date('Y-m-d H:i:s') . '] [header.php nav] ' . $e->getMessage());
         // Fallback silencioso: el menú sale solo con "Portada" — nunca rompe la página.
     }
+
+    // ── FILTRO CRONOLÓGICO (2026-07-31) — rango real de años con notas
+    // publicadas, cacheado igual que el menú (TTL 300s, misma red de
+    // seguridad: MIN/MAX(YEAR(published_at)) no cambia con cada request).
+    require_once __DIR__ . '/../../helpers/date_filter.php';
+    $dateFilterActive = resolve_date_filter_range();
+    try {
+        $yearRange = cache_remember('cabovision_year_range_v1', 300, static function () {
+            $yearDb  = new Database();
+            $yearPdo = $yearDb->getConnection();
+            $row = $yearPdo->query('SELECT MIN(YEAR(`published_at`)) AS min_y, MAX(YEAR(`published_at`)) AS max_y FROM `articles`')
+                ->fetch(\PDO::FETCH_ASSOC);
+            return ['min' => (int) ($row['min_y'] ?? date('Y')), 'max' => (int) ($row['max_y'] ?? date('Y'))];
+        });
+    } catch (\PDOException $e) {
+        error_log('[' . date('Y-m-d H:i:s') . '] [header.php date_filter] ' . $e->getMessage());
+        $yearRange = ['min' => (int) date('Y'), 'max' => (int) date('Y')];
+    }
+
+    // El filtro solo tiene sentido en listados (portada/categoría) — en
+    // articulo.php (una sola nota) no hay nada que filtrar.
+    $currentScript   = basename((string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    $showDateFilter  = in_array($currentScript, ['index.php', 'categoria.php'], true);
+    $dateFilterAction = $currentScript === 'categoria.php' ? 'categoria.php' : 'index.php';
     ?>
 
     <link rel="icon" href="<?= base_path() ?>/favicon.ico">
@@ -215,6 +239,11 @@
             }
         })();
     </script>
+    <!-- Prefijo de ruta del sitio para JS estático (no procesa PHP, no puede
+         leer base_path() directo) — mismo valor que helpers/base_path.php,
+         derivado de APP_URL. Debe declararse ANTES de cualquier <script src>
+         que lo consuma (assets/js/*.js). -->
+    <script>window.BASE_PATH = "<?= htmlspecialchars(base_path(), ENT_QUOTES, 'UTF-8') ?>";</script>
 </head>
 <body>
     <!-- Barra de navegación móvil legítima, clonada de CACHE/Portada_ESTERILIZADA.html
@@ -349,4 +378,40 @@
             </div>
         </nav>
     </div>
+
+    <?php if ($showDateFilter): ?>
+    <div class="gkPage">
+        <form class="date-filter" method="get" action="<?= base_path() ?>/<?= $dateFilterAction ?>">
+            <?php if ($dateFilterAction === 'categoria.php' && isset($categoryAlias)): ?>
+                <input type="hidden" name="alias" value="<?= htmlspecialchars($categoryAlias, ENT_QUOTES, 'UTF-8') ?>">
+            <?php endif; ?>
+            <label for="date-filter-year">Año</label>
+            <select id="date-filter-year" name="year">
+                <option value="">Todos</option>
+                <?php for ($y = $yearRange['max']; $y >= $yearRange['min']; $y--): ?>
+                    <option value="<?= $y ?>" <?= ($dateFilterActive !== null && $dateFilterActive['year'] === $y) ? 'selected' : '' ?>><?= $y ?></option>
+                <?php endfor; ?>
+            </select>
+            <label for="date-filter-month">Mes</label>
+            <select id="date-filter-month" name="month">
+                <option value="">Todos</option>
+                <?php foreach (['01' => 'Enero', '02' => 'Febrero', '03' => 'Marzo', '04' => 'Abril', '05' => 'Mayo', '06' => 'Junio', '07' => 'Julio', '08' => 'Agosto', '09' => 'Septiembre', '10' => 'Octubre', '11' => 'Noviembre', '12' => 'Diciembre'] as $monthNum => $monthName): ?>
+                    <option value="<?= $monthNum ?>" <?= ($dateFilterActive !== null && $dateFilterActive['month'] === (int) $monthNum) ? 'selected' : '' ?>><?= $monthName ?></option>
+                <?php endforeach; ?>
+            </select>
+            <label for="date-filter-day">Día</label>
+            <select id="date-filter-day" name="day">
+                <option value="">Todos</option>
+                <?php for ($d = 1; $d <= 31; $d++): ?>
+                    <option value="<?= $d ?>" <?= ($dateFilterActive !== null && $dateFilterActive['day'] === $d) ? 'selected' : '' ?>><?= $d ?></option>
+                <?php endfor; ?>
+            </select>
+            <button type="submit">Filtrar</button>
+            <?php if ($dateFilterActive !== null): ?>
+                <a class="date-filter__clear" href="<?= base_path() ?>/<?= $dateFilterAction ?><?= ($dateFilterAction === 'categoria.php' && isset($categoryAlias)) ? '?alias=' . urlencode($categoryAlias) : '' ?>">Quitar filtro</a>
+            <?php endif; ?>
+        </form>
+    </div>
+    <?php endif; ?>
+
     <main class="container">

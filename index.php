@@ -14,6 +14,7 @@ require_once __DIR__ . '/api/conexion.php';
 require_once __DIR__ . '/helpers/input_sanitizer.php';
 require_once __DIR__ . '/helpers/security_shield.php';
 require_once __DIR__ . '/helpers/base_path.php';
+require_once __DIR__ . '/helpers/date_filter.php';
 
 if (is_ip_banned()) {
     http_response_code(403);
@@ -28,6 +29,12 @@ const PER_PAGE = 12;
 $page   = max(1, sanitize_int($_GET['page'] ?? 1, 1));
 $offset = ($page - 1) * PER_PAGE;
 
+$dateFilter      = resolve_date_filter_range();
+$dateFilterQuery = date_filter_query_string($dateFilter);
+$dateFilterSql   = $dateFilter !== null
+    ? 'AND `articles`.`published_at` >= :date_start AND `articles`.`published_at` < :date_end'
+    : '';
+
 $database = new Database();
 $pdo      = $database->getConnection();
 
@@ -37,11 +44,15 @@ $stmt = $pdo->prepare(
             `categories`.`name` AS `category_name`, `categories`.`alias` AS `category_alias`
      FROM `articles`
      INNER JOIN `categories` ON `categories`.`id` = `articles`.`category_id`
-     WHERE `articles`.`status_id` = :status_id
+     WHERE `articles`.`status_id` = :status_id {$dateFilterSql}
      ORDER BY `articles`.`published_at` DESC
      LIMIT :limit OFFSET :offset"
 );
 $stmt->bindValue(':status_id', STATUS_PUBLICADO, PDO::PARAM_INT);
+if ($dateFilter !== null) {
+    $stmt->bindValue(':date_start', $dateFilter['start']);
+    $stmt->bindValue(':date_end', $dateFilter['end']);
+}
 $stmt->bindValue(':limit', PER_PAGE, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
@@ -69,15 +80,15 @@ require __DIR__ . '/views/partials/header.php';
         </div>
 
         <?php if (empty($articles)): ?>
-            <p>No hay noticias publicadas todavía.</p>
+            <p><?= $dateFilter !== null ? 'No hay noticias publicadas en esa fecha.' : 'No hay noticias publicadas todavía.' ?></p>
         <?php endif; ?>
 
         <nav class="arf-pagination" aria-label="Paginación de noticias">
             <?php if ($page > 1): ?>
-                <a href="<?= base_path() ?>/index.php?page=<?= $page - 1 ?>">&larr; Anterior</a>
+                <a href="<?= base_path() ?>/index.php?page=<?= $page - 1 ?><?= $dateFilterQuery ?>">&larr; Anterior</a>
             <?php endif; ?>
             <?php if (count($articles) === PER_PAGE): ?>
-                <a href="<?= base_path() ?>/index.php?page=<?= $page + 1 ?>">Siguiente &rarr;</a>
+                <a href="<?= base_path() ?>/index.php?page=<?= $page + 1 ?><?= $dateFilterQuery ?>">Siguiente &rarr;</a>
             <?php endif; ?>
         </nav>
     </div>

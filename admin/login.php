@@ -25,6 +25,7 @@ rate_limit_enforce('admin_page', 60, 60); // punto de entrada pre-autenticación
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Acceso — Panel CaboVision.tv</title>
 <link rel="icon" href="<?= base_path() ?>/favicon.ico">
+<script>window.BASE_PATH = "<?= htmlspecialchars(base_path(), ENT_QUOTES, 'UTF-8') ?>";</script>
 <style><?= file_get_contents(__DIR__ . '/../assets/css/main.css') ?></style>
 <style>
     body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
