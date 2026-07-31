@@ -11,7 +11,7 @@
                     <input type="email" placeholder="Correo electrónico" aria-label="Correo electrónico" disabled>
                     <button type="submit" disabled>Suscribirme</button>
                 </form>
-                <p class="newsletter-box__note">Módulo de correo pendiente de configuración — formulario deshabilitado hasta activar SMTP/lista real.</p>
+                <p class="newsletter-box__note">Muy pronto podrás suscribirte desde aquí.</p>
             </div>
 
             <nav aria-label="Enlaces de pie de página">

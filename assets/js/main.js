@@ -76,4 +76,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
     });
+
+    // "Ir a inicio" — el botón del footer y el flotante existían en el HTML
+    // desde antes, ambos sin manejador de clic (no hacían nada al
+    // presionarlos). El flotante además solo debe verse tras hacer scroll,
+    // nunca al cargar la página (por eso nace con el atributo `hidden`).
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const footerBackToTop = document.getElementById('back-to-top');
+    if (footerBackToTop) {
+        footerBackToTop.addEventListener('click', scrollToTop);
+    }
+
+    const floatingBackToTop = document.getElementById('floating-back-to-top');
+    if (floatingBackToTop) {
+        floatingBackToTop.addEventListener('click', scrollToTop);
+
+        const SCROLL_THRESHOLD = 400;
+        const toggleFloatingButton = () => {
+            floatingBackToTop.hidden = window.scrollY < SCROLL_THRESHOLD;
+        };
+        toggleFloatingButton();
+        window.addEventListener('scroll', toggleFloatingButton, { passive: true });
+    }
 });

@@ -714,3 +714,16 @@ video {
     cursor: pointer;
     padding: 0.4rem 0.8rem;
 }
+
+.floating-back-to-top {
+    position: fixed;
+    right: var(--space-sm);
+    bottom: var(--space-sm);
+    z-index: 40;
+    background: var(--color-bg-alt);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    font-size: 1.1rem;
+}
