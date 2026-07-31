@@ -132,3 +132,14 @@ composer.phar
 # referencia histórica. Permanece en disco local, nunca se versiona ni
 # despliega. Confirmar con el Arquitecto antes de eliminarlo físicamente.
 /ACTUAL/
+
+# ── HOT STORAGE / UPLOADS DE USUARIO (2026-07-31) ─────────────────────────────
+# {tenant_id}/{YYYY}/{MM}/{DD}/ nunca se versiona — son binarios de usuario,
+# sincronizados solo por FTP fuera de git (ver .github/workflows/deploy-staging.yml,
+# exclusión [0-9]*/[0-9][0-9][0-9][0-9]/**). Anclado a la raíz con "/" — NO usar
+# "img/"/"images/" sin ancla, rompería el versionado real de assets/img/ (logos,
+# banners de marca, sí forman parte del código).
+/1002/
+/images/
+/img/
+/BackUp/
