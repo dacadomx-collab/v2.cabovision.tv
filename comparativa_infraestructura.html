@@ -121,6 +121,20 @@ footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
     </div>
     <p style="font-size:0.85rem;color:var(--text-muted)">Precisión honesta: ambos incidentes (versión de PHP y credenciales de entorno local filtradas al <code>.env</code> remoto) se originaron por copiar configuración de desarrollo directo a staging sin adaptarla — ya corregido, pero documentado aquí sin maquillaje porque es la causa real detrás de dos caídas HTTP 500 durante este despliegue.</p>
 
+    <h3>Bitácora real de incidentes — puesta en marcha de staging (2026-07-31)</h3>
+    <table class="data">
+        <thead><tr><th>#</th><th>Síntoma</th><th>Causa raíz real</th><th>Resolución</th><th>Estado</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>HTTP 500 en todo el sitio</td><td>Hosting servía PHP &lt;8.1 por defecto — incompatible con tipos <code>mixed</code>/<code>never</code> del código</td><td>PHP actualizado a 8.2 en el panel del hosting</td><td><span class="badge badge--ok">Resuelto</span></td></tr>
+            <tr><td>2</td><td>HTTP 500 persistente tras el fix de PHP</td><td><code>.env</code> remoto con <code>DB_HOST/DB_NAME/DB_USER</code> idénticos al XAMPP local — la app intentaba conectar a su propio <code>localhost</code>, no a la BD real</td><td>Credenciales reales de <code>comunicabos_v2_cabovision.tv</code> aplicadas al <code>.env</code> remoto</td><td><span class="badge badge--ok">Resuelto</span></td></tr>
+            <tr><td>3</td><td>Sitio sin CSS/JS/imágenes (texto plano)</td><td>84 rutas en 18 archivos con el subdirectorio de XAMPP local (<code>/CaboVision.tv/</code>) hardcodeado — no existe en un dominio real</td><td><code>helpers/base_path.php</code>, prefijo derivado de <code>APP_URL</code></td><td><span class="badge badge--ok">Resuelto</span></td></tr>
+            <tr><td>4</td><td>Íconos sociales invisibles en modo claro</td><td><code>assets/legacy/app.css</code> fijaba <code>.social&#123;color:#fff&#125;</code> sin depender del tema</td><td>Regla equivalente en <code>main.css</code>, misma especificidad, gana por orden de cascada</td><td><span class="badge badge--ok">Resuelto</span></td></tr>
+            <tr><td>5</td><td>Botón "Ir a inicio" sin efecto</td><td>Existía en el HTML desde antes, nunca tuvo manejador de clic ni <code>position:fixed</code> el flotante</td><td><code>scrollTo</code> suave + show/hide por umbral de scroll en <code>main.js</code></td><td><span class="badge badge--ok">Resuelto</span></td></tr>
+            <tr><td>6</td><td>Banners de patrocinio ausentes en portada (sin error visible)</td><td>Importación de la BD vía phpMyAdmin quedó incompleta — <code>sponsor_banners</code> (y posiblemente otras tablas) no se crearon, probablemente por límite de tiempo de ejecución con el dump de 31&nbsp;MB en un solo archivo</td><td>Dump dividido en 4 archivos por tamaño de tabla (<code>01_estructura</code> → <code>04_datos_articles</code>) para reimportar sin repetir el timeout</td><td><span class="badge badge--pending">En curso</span></td></tr>
+        </tbody>
+    </table>
+    <p style="font-size:0.85rem;color:var(--text-muted)">Patrón común a los incidentes 1-3: configuración y datos de desarrollo local promovidos a staging sin adaptar. Ninguno es un defecto de la arquitectura del código en sí — todos son de <em>puesta en marcha</em>, ya reflejados en el checklist de despliegue para la próxima promoción de entorno.</p>
+
     <h2>1 · Seguridad perimetral</h2>
     <div class="vs-grid">
         <div class="vs-col vs-col--legacy">
