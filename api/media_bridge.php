@@ -11,6 +11,74 @@ declare(strict_types=1);
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/../helpers/media.php';
 
+// =============================================================================
+// Fallback en cascada para rutas legacy (2026-07-31) — ?legacy_path=images/
+// stories/... (formato pre-migración, nunca paso por el pipeline Hot/Cold,
+// sin fila en media_assets). A diferencia de ?path= (que exige un registro
+// verificado en media_assets), esto es "mejor esfuerzo": Hot local -> Cold
+// bridge directo -> placeholder real con 200 OK, nunca un 404 roto en pantalla.
+// =============================================================================
+function serve_legacy_path(string $legacyPath): never
+{
+    if (preg_match('#^images/stories/[\w\-./]+\.(jpg|jpeg|png|gif)$#i', $legacyPath) !== 1) {
+        http_response_code(400);
+        exit;
+    }
+
+    // Capa 1: Hot local — por si algún día se llega a poblar ese árbol legacy.
+    $hotFile = dirname(__DIR__) . '/' . $legacyPath;
+    if (is_file($hotFile) && str_starts_with(realpath($hotFile) ?: '', dirname(__DIR__))) {
+        $mime = (string) mime_content_type($hotFile);
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Content-Type: ' . $mime);
+        readfile($hotFile);
+        exit;
+    }
+
+    // Capa 2: Cold bridge directo — intento de mejor esfuerzo, sin fila en
+    // media_assets que lo respalde (nunca se migró formalmente esta ruta).
+    $envPath = dirname(__DIR__) . '/.env';
+    $env     = is_readable($envPath) ? (parse_ini_file($envPath, false, INI_SCANNER_RAW) ?: []) : [];
+    $bridgeUrl = rtrim((string) ($env['ACADEP_BRIDGE_URL'] ?? ''), '/');
+    $bridgeKey = (string) ($env['ACADEP_BRIDGE_KEY'] ?? '');
+
+    if ($bridgeUrl !== '' && $bridgeKey !== '') {
+        $ch = curl_init($bridgeUrl . '/view?asset=' . urlencode($legacyPath));
+        curl_setopt_array($ch, [
+            CURLOPT_HTTPHEADER     => ['X-ACADEP-Bridge-Key: ' . $bridgeKey],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT        => 5,
+        ]);
+        $body = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($code === 200 && $body !== false && $body !== '') {
+            header('Cache-Control: public, max-age=86400');
+            header('Content-Type: image/jpeg');
+            echo $body;
+            exit;
+        }
+    }
+
+    // Capa 3: fallback seguro — placeholder real, 200 OK, nunca un ícono roto.
+    // Ruta de FILESYSTEM directa (media_placeholder_path() devuelve una URL
+    // con base_path() ya aplicado — concatenarla aquí duplicaría el prefijo).
+    $placeholderFile = dirname(__DIR__) . '/assets/img/logocabovis_glow.png';
+    header('Cache-Control: public, max-age=300'); // corto: no cachea el "no encontrado" a largo plazo
+    header('Content-Type: image/png');
+    if (is_file($placeholderFile)) {
+        readfile($placeholderFile);
+    }
+    exit;
+}
+
+$legacyPath = $_GET['legacy_path'] ?? '';
+if ($legacyPath !== '') {
+    serve_legacy_path($legacyPath);
+}
+
 $path = $_GET['path'] ?? '';
 if (!preg_match('#^\d+/\d{4}/\d{2}/\d{2}/[\w\-.]+\.(jpg|jpeg|png|webp)$#i', $path)) {
     http_response_code(400);
