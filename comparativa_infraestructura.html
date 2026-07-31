@@ -74,6 +74,7 @@ table.data th,table.data td{padding:0.6rem 0.75rem;text-align:left;border-bottom
 table.data th{color:var(--text-muted);text-transform:uppercase;font-size:0.72rem;letter-spacing:0.04em;}
 
 .note{background:var(--bg-alt);border-left:4px solid var(--text-muted);border-radius:0.25rem;padding:1rem 1.25rem;font-size:0.88rem;margin:1.5rem 0;color:var(--text-muted);}
+.note.ok{border-left-color:var(--good);}
 .note.warn{border-left-color:var(--pending);}
 .note.crit{border-left-color:var(--bad);}
 
@@ -114,7 +115,7 @@ footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
                 <li><span class="badge badge--ok">Purgado</span> Los 3 archivos maliciosos confirmados y eliminados — verificado por contenido, no solo por reporte de escáner.</li>
                 <li><span class="badge badge--ok">Real</span> <code>api/auth_login.php</code>: 6 capas (ver desglose abajo), contra el RBAC real de 17 cuentas.</li>
                 <li><span class="badge badge--ok">Real</span> PDO <code>ATTR_EMULATE_PREPARES=false</code>, 100% prepared statements en endpoints auditados.</li>
-                <li><span class="badge badge--pending">Pendiente</span> WAF perimetral y rate limiting a nivel de sitio — no iniciado, solo tarpitting en login.</li>
+                <li><span class="badge badge--ok">Real</span> WAF perimetral (firmas SQLi/XSS/traversal) y rate limiting por IP en las 3 rutas públicas, 7 vistas de admin y toda la API — <code>helpers/security_shield.php</code>.</li>
             </ul>
         </div>
     </div>
@@ -194,9 +195,11 @@ footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
         <li><strong>Fuente de verdad comercial</strong> — <code>sponsor_banners.accumulated_clicks</code>, actualizado vía <code>api/sponsors_redirect.php</code>.</li>
         <li><strong>Auditoría de Cold Storage</strong> — <code>telemetria_cold_storage</code>, append-only, con triggers que bloquean <code>UPDATE</code>/<code>DELETE</code>.</li>
     </ul>
-
+    <div class="note ok">
+        <strong>Resuelto (2026-07-31):</strong> WAF perimetral y rate-limiting a nivel de sitio — <code>helpers/security_shield.php</code> (firmas SQLi/XSS/traversal + límite de tasa por IP con degradación segura) ya cubre las 3 rutas públicas (<code>index.php</code>, <code>articulo.php</code>, <code>categoria.php</code>) y las 7 vistas de <code>admin/</code>, además de todo <code>api/</code> vía <code>cors.php</code>. Commit <code>35d6ef7</code>.
+    </div>
     <div class="note warn">
-        <strong>Pendiente real, no resuelto:</strong> WAF/rate-limiting a nivel de sitio, dashboard ejecutivo de patrocinadores (CTR/viewability por zona), editor "Una Sola Pantalla", conversión de imágenes a WebP/AVIF. Ver <code>knowledge/migration_checklist.md</code> para el detalle fase por fase con fecha real de cada ítem.
+        <strong>Pendiente real, no resuelto:</strong> dashboard ejecutivo de patrocinadores (CTR/viewability por zona), editor "Una Sola Pantalla", conversión de imágenes a WebP/AVIF. Ver <code>knowledge/migration_checklist.md</code> para el detalle fase por fase con fecha real de cada ítem.
     </div>
 
     <footer>
