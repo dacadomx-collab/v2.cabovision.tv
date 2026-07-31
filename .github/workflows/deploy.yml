@@ -1,0 +1,80 @@
+name: Deploy a Producción (FTP) — AXON_DCD CI/CD v2
+
+# ── TRIGGER ────────────────────────────────────────────────────────────────────
+# Se activa SOLO en push a la rama principal. Nunca en ramas de feature.
+on:
+  push:
+    branches:
+      - main
+      - master
+
+# ── JOB PRINCIPAL ─────────────────────────────────────────────────────────────
+jobs:
+  web-deploy:
+    name: Build & Deploy FTP
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── PASO 1: Obtener código fuente completo ───────────────────────────────
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # Necesario para que FTP-Deploy calcule el diff correctamente
+
+      # ── PASO 2 (OPCIONAL): Build de frontend (Next.js / Vite / etc.) ─────────
+      # Descomentar si el proyecto tiene un paso de compilación de frontend.
+      #
+      # - name: Instalar Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20'
+      #
+      # - name: Instalar dependencias
+      #   run: npm ci
+      #
+      # - name: Construir frontend
+      #   run: npm run build
+      #
+      # - name: Mover build a raíz (sin sobrescribir carpetas PHP)
+      #   run: |
+      #     cp -R dist/* ./   # Ajustar según la carpeta de output del bundler
+
+      # ── PASO 3 (OPCIONAL): Instalar dependencias PHP (Composer) ──────────────
+      # Descomentar si el proyecto usa Composer.
+      #
+      # - name: Instalar dependencias PHP
+      #   run: composer install --no-dev --optimize-autoloader
+
+      # ── PASO 4: Sincronización FTP (solo archivos cambiados, diff incremental) ─
+      - name: Sincronizar archivos con servidor FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:     ${{ secrets.FTP_SERVER }}
+          username:   ${{ secrets.FTP_USERNAME }}
+          password:   ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}
+          # Exclusiones de seguridad — NO desplegar secretos ni herramientas internas
+          exclude: |
+            **/.git/**
+            **/.git*
+            .env
+            .env.*
+            !.env.example
+            knowledge/**
+            scripts/**
+            .claude/**
+            logs/**
+            backups/**
+            backups_y_pruebas/**
+            **/*.sql
+            **/*.log
+            **/*.md
+            !README.md
+            node_modules/**
+            vendor/**
+            **/*.zip
+            **/*.rar
+            **/*.bak
+            info.txt
+            CLAUDE.md
+            AGENTS.md

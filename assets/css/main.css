@@ -1,0 +1,702 @@
+/* =============================================================================
+   assets/css/main.css — [NOMBRE_DEL_PROYECTO]
+   Mobile-First | ARF-Grid (Adaptive Responsive Flex) | Modo Oscuro fluido
+   Mandamiento #1: nacer para celular, sin anchos fijos en contenedores.
+   Mandamiento #3: contraste mínimo WCAG 4.5:1.
+   Prohibido: !important, estilos inline.
+   ============================================================================= */
+
+/* Suprime el ícono nativo de "mostrar contraseña" de Edge/IE — el proyecto
+   ya implementa su propio Password Visibility Toggle (MODULO_01 §4.6) y
+   tener los dos a la vez es confuso (2 íconos de ojo superpuestos, bug real
+   visto con captura de navegador en admin/login.php). Firefox/Chrome no
+   agregan un ícono nativo propio, así que esto es un no-op inofensivo ahí. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+:root {
+    --color-bg: #ffffff;
+    --color-bg-alt: #f1f5f9;
+    --color-text: #0f172a;
+    --color-text-muted: #475569;
+    --color-primary: #0f172a;
+    --color-accent: #9f1d1d;
+    --color-accent-contrast: #ffffff;
+    --color-border: #e2e8f0;
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2.5rem;
+    --space-xl: 4rem;
+    --radius: 0.5rem;
+    --container-max: 1400px;
+    /* Editorial Moderno (2026-07-21): serif solo para titulares, pila nativa —
+       cero peticiones de red nuevas (Fast by Design), no se agrega ningún
+       @font-face ni CDN de fuentes. */
+    --font-headline: Georgia, Cambria, "Times New Roman", serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg: #0b1120;
+        --color-bg-alt: #111827;
+        --color-text: #f1f5f9;
+        --color-text-muted: #cbd5e1;
+        --color-primary: #38bdf8;
+        --color-accent: #f87171;
+        --color-accent-contrast: #0b1120;
+        --color-border: #1e293b;
+    }
+}
+
+:root[data-theme="dark"] {
+    --color-bg: #0b1120;
+    --color-bg-alt: #111827;
+    --color-text: #f1f5f9;
+    --color-text-muted: #cbd5e1;
+    --color-primary: #38bdf8;
+    --color-accent: #f87171;
+    --color-accent-contrast: #0b1120;
+    --color-border: #1e293b;
+}
+
+:root[data-theme="light"] {
+    --color-bg: #ffffff;
+    --color-bg-alt: #f1f5f9;
+    --color-text: #0f172a;
+    --color-text-muted: #475569;
+    --color-primary: #0f172a;
+    --color-accent: #9f1d1d;
+    --color-accent-contrast: #ffffff;
+    --color-border: #e2e8f0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    /* Fluidez del cambio claro/oscuro (2026-07-21): sin esto el toggle se
+       sentía como un "salto" de color instantáneo. transition en background/
+       color, NUNCA en transform/layout — cero riesgo de reflow/CLS. */
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+a {
+    color: inherit;
+}
+
+:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+img,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ── CONTENEDOR MAESTRO: ancho fluido con tope vía variable nativa ───────── */
+.container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-md);
+}
+
+/* ── ARF-GRID (Adaptive Responsive Foundation): 100% responsivo, cero px fijos */
+.arf-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--space-md);
+    width: 100%;
+    padding: var(--space-md);
+}
+
+.arf-grid > * {
+    flex: 1 1 100%;
+}
+
+@media (min-width: 640px) {
+    .arf-grid > .arf-col-2 {
+        /* flex-grow: 0 — un elemento huérfano en la última fila (ej. 3 tarjetas en
+           una fila de 2 columnas) debe conservar el mismo ancho que sus hermanas,
+           nunca estirarse a ocupar la fila completa (bug real visto en "Noticias
+           Relacionadas" con 4 tarjetas de 3 columnas: la 4ª se veía gigante). */
+        flex: 0 1 calc(50% - var(--space-md));
+    }
+}
+
+@media (min-width: 960px) {
+    .arf-grid > .arf-col-3 {
+        flex: 0 1 calc(33.333% - var(--space-md));
+    }
+    .arf-grid > .arf-col-4 {
+        flex: 0 1 calc(25% - var(--space-md));
+    }
+}
+
+.card {
+    background-color: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-md);
+}
+
+/* =============================================================================
+   EDITORIAL MODERNO (2026-07-21) — .article-card, .site-header, .site-footer,
+   .arf-article no tenían NINGÚN estilo dedicado en ningún archivo del proyecto
+   antes de esto (verificado por búsqueda en todo assets/) — el sitio dependía
+   solo de .card y Bootstrap 4 crudo. Esto construye el sistema real, no
+   sobrescribe uno existente. Carga después de bootstrap.css/app.css (ver
+   header.php) — gana la cascada sin necesitar !important.
+   ============================================================================= */
+
+/* ── ENCABEZADO — minimalista, un solo borde inferior ─────────────────────── */
+/* Simetría real (2026-07-23): .gkPage (app.css) fijaba max-width:1300px
+   mientras <main class="container"> usa var(--container-max):1400px, y
+   #myHeader (fila del menú) no tenía NINGÚN max-width/centrado — quedaba
+   pegado al borde izquierdo del viewport (bug real confirmado con
+   Playwright: .navbar en x=0..933 dentro de un viewport de 1440, sin
+   centrar). Las tres filas del header ahora comparten el mismo ancho y eje
+   de centrado que el contenido principal. */
+.gkPage {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-block: var(--space-sm);
+}
+
+#myHeader {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-md);
+}
+
+/* ── MENÚ DE ESCRITORIO — reparto simétrico (2026-07-23) — app.css fija
+   .navbar-nav{display:table;width:100%}, pero ese 100% es el ancho de SU
+   PROPIO contenido (tabla de columnas auto), no el disponible del contenedor
+   flex padre — por eso #main-nav quedaba "encogido" a 702px pegado a la
+   izquierda dentro de un header ya centrado a 1400px, en vez de repartirse.
+   ID > clase gana la cascada sin !important. */
+.navbar {
+    width: 100%;
+}
+
+#main-menu-collapse {
+    justify-content: space-between;
+}
+
+#main-nav {
+    display: flex;
+    flex: 1 1 auto;
+}
+
+#main-nav .nav-item {
+    flex: 1 1 0;
+    text-align: center;
+}
+
+/* ── FILA LOGO + BANNER (2026-07-22) — ver views/partials/header.php: antes
+   usaba .row/.col-lg-6 de Bootstrap crudo, ahora ARF-Grid real. */
+.arf-header-row {
+    align-items: center;
+}
+
+#banner-top {
+    margin-top: var(--space-sm);
+}
+
+.banner-cab {
+    /* Bootstrap reboot ya trae img{max-width:100%}, esto es red de seguridad
+       explícita (Mandamiento de la Directiva: cero desbordamientos) para que
+       el banner nunca dependa de que esa hoja cargue primero. */
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ── BARRA MÓVIL FIJA (2026-07-22) — app.css define .sticky con
+   position:fixed, que saca #headerxs del flujo del documento SIN reservar su
+   alto: el banner de .gkPage quedaba montado detrás de esa barra fija en
+   tablet/celular (bug real confirmado con Playwright — se veía "cortado").
+   position:sticky se seguía fijando al hacer scroll igual, pero SÍ reserva su
+   caja en el flujo — mismo efecto, sin el solape. Mayor especificidad (misma
+   cantidad de clases, pero main.css carga después) gana sin !important. */
+.menu-xs.sticky {
+    position: sticky;
+}
+
+/* ── TOOLBAR DE TEMA + REDES SOCIALES (2026-07-22) — .main-menu ul li a
+   (app.css) fija display:block;height:60px para los links del menú
+   principal, pero esa regla alcanza también a los <a> de Facebook/Twitter/
+   YouTube porque viven dentro del mismo <li> (misma cascada .main-menu ul li
+   a). Efecto real confirmado con Playwright: los 3 íconos se apilaban en
+   VERTICAL dentro de su <li>, inflando esa columna a 240px de alto y
+   empujando visualmente el toggle de tema a verse "flotando huérfano" en
+   medio del header. Selectores de dos clases (mayor especificidad que el
+   selector de una clase + 3 elementos de app.css) ganan sin !important. */
+.main-menu__aside {
+    display: flex;
+    align-items: center;
+    height: auto;
+}
+
+.main-menu__aside .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.main-menu__aside .nav-link {
+    display: inline-flex;
+    align-items: center;
+    height: auto;
+    padding: 0;
+    border-right: none;
+}
+
+/* app.css (legacy) fija .main-menu en azul marino (#002866) con texto blanco y
+   .active en verde (#009939) — chrome pesado, no encaja con "chrome
+   minimalista". main.css carga después (ver header.php), así que esto gana
+   la cascada sin !important. */
+.main-menu {
+    background: var(--color-bg);
+}
+
+.main-menu ul li a,
+.main-menu .nav-link {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--color-text);
+    text-transform: uppercase;
+    border-right-color: var(--color-border);
+}
+
+.main-menu .nav-link:hover {
+    color: var(--color-accent);
+}
+
+.main-menu .active {
+    background: transparent;
+    color: var(--color-accent);
+    box-shadow: inset 0 -2px 0 var(--color-accent);
+}
+
+/* ── DROPDOWNS REALES (2026-07-21) — bootstrap.css fija display:none y solo lo
+   revierte con la clase .show que agrega bootstrap.bundle.js — que este
+   proyecto NUNCA carga (peso muerto evitado a propósito). Sin esto, los
+   menús "Noticias▾"/"Especiales▾" no abrían con NADA, ni clic ni hover —
+   confirmado con navegador real antes de tocar el CSS. Doble mecanismo:
+   :hover para mouse de escritorio (cero JS), + .show vía main.js para
+   táctil/mobile y teclado, ambos con la misma transición fluida. */
+.dropdown-menu {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    background-color: var(--color-bg-alt);
+    border-color: var(--color-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.dropdown:hover > .dropdown-menu,
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    color: var(--color-text);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus-visible {
+    background-color: var(--color-bg);
+    color: var(--color-accent);
+}
+
+.dropdown-toggle::after {
+    transition: transform 0.18s ease;
+}
+
+.dropdown:hover > .dropdown-toggle::after,
+.dropdown-toggle[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+}
+
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    width: 2.25rem;
+    height: 2.25rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text);
+}
+
+.theme-toggle__icon--moon {
+    display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    .theme-toggle__icon--sun {
+        display: none;
+    }
+    .theme-toggle__icon--moon {
+        display: inline;
+    }
+}
+
+:root[data-theme="dark"] .theme-toggle__icon--sun {
+    display: none;
+}
+:root[data-theme="dark"] .theme-toggle__icon--moon {
+    display: inline;
+}
+:root[data-theme="light"] .theme-toggle__icon--sun {
+    display: inline;
+}
+:root[data-theme="light"] .theme-toggle__icon--moon {
+    display: none;
+}
+
+/* ── VIDEO EMBEBIDO (2026-07-23) — mismo criterio Zero-CLS que sponsor_banner.php:
+   aspect-ratio reserva el espacio antes de que el iframe termine de cargar. */
+.video-embed {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    margin-block: var(--space-md);
+}
+
+.video-embed iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+/* ── TARJETA DE ARTÍCULO — foto grande, eyebrow de categoría, titular serif ── */
+.article-card {
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    transition: transform 0.2s ease;
+}
+
+.article-card:hover {
+    transform: translateY(-3px);
+}
+
+.article-card__link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.article-card__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background-color: var(--color-bg-alt);
+}
+
+.article-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.article-card__link:hover .article-card__media img {
+    transform: scale(1.04);
+}
+
+.article-card__featured {
+    position: absolute;
+    top: var(--space-xs);
+    left: var(--space-xs);
+    background-color: var(--color-accent);
+    color: var(--color-accent-contrast);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+}
+
+.media-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    color: var(--color-text-muted);
+}
+
+.media-fallback__label {
+    font-size: 0.75rem;
+}
+
+.article-card__body {
+    padding-block: var(--space-sm);
+}
+
+.article-card__category {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-accent);
+    margin-bottom: var(--space-xs);
+}
+
+.article-card__title {
+    font-family: var(--font-headline);
+    font-size: 1.35rem;
+    line-height: 1.3;
+    margin: 0 0 var(--space-xs);
+    color: var(--color-text);
+}
+
+.article-card__extract {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+/* ── ARTÍCULO COMPLETO — ancho de lectura acotado, tipografía editorial ────── */
+.arf-article {
+    max-width: 72ch;
+    margin-inline: auto;
+    padding-block: var(--space-md) var(--space-xl);
+}
+
+.arf-article__category a {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+.arf-article__title {
+    font-family: var(--font-headline);
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    line-height: 1.2;
+    margin: var(--space-xs) 0;
+    color: var(--color-text);
+}
+
+.arf-article__meta {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    margin-bottom: var(--space-md);
+}
+
+.arf-article__media {
+    margin-block: var(--space-md);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.arf-article__media img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.arf-article__body {
+    font-size: 1.05rem;
+    line-height: 1.75;
+}
+
+.arf-article__body img {
+    border-radius: var(--radius);
+    margin-block: var(--space-sm);
+}
+
+.arf-article__body a {
+    color: var(--color-accent);
+}
+
+.arf-article__sponsor {
+    max-width: 300px;
+    margin: var(--space-xl) auto 0;
+}
+
+/* ── LAYOUT CON SIDEBAR (index.php/categoria.php) — una sola columna en
+   móvil (Fricción Cero de lectura, sin distracción lateral angosta), grid
+   real de 2 columnas desde escritorio. El aside reserva su propio ancho fijo
+   siempre — nunca causa reflow del contenido principal al cargar. ── */
+.arf-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    .arf-layout {
+        grid-template-columns: minmax(0, 1fr) 300px;
+    }
+    .arf-layout__aside {
+        position: sticky;
+        top: var(--space-md);
+    }
+}
+
+.arf-related {
+    /* Sin max-width 72ch a propósito: el grid de tarjetas necesita el ancho
+       completo del .container para que arf-col-3 (activa desde 960px de
+       VIEWPORT, no de contenedor) tenga espacio real de sobra — a diferencia
+       de .arf-article, que sí es prosa y por eso se acota a 72ch. */
+    margin: var(--space-xl) auto 0;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-md);
+}
+
+.arf-related__title {
+    font-family: var(--font-headline);
+    font-size: 1.3rem;
+    margin-bottom: var(--space-sm);
+    padding-inline: var(--space-md);
+}
+
+.arf-related .arf-grid {
+    justify-content: flex-start;
+}
+
+.arf-portada__title {
+    font-family: var(--font-headline);
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    padding-inline: var(--space-md);
+    margin-block: var(--space-md) 0;
+}
+
+.arf-category__title {
+    font-family: var(--font-headline);
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    padding-inline: var(--space-md);
+    margin-block: var(--space-md) 0;
+}
+
+/* ── PAGINACIÓN ─────────────────────────────────────────────────────────────── */
+.arf-pagination {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-md);
+    gap: var(--space-sm);
+}
+
+.arf-pagination a {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--color-accent);
+}
+
+/* ── ZONA DE PATROCINADOR — cero CLS: aspect-ratio fijo reservado ANTES de
+   que la imagen real cargue, sin importar sus dimensiones intrínsecas
+   (verificadas: 230x192, 300x250, 700x429 — todas caben con object-fit). ── */
+.sponsor-slot {
+    background-color: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-xs);
+    margin-bottom: var(--space-md);
+}
+
+.sponsor-slot__label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-xs);
+}
+
+.sponsor-slot a {
+    display: block;
+    aspect-ratio: 300 / 250;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 0.15rem);
+}
+
+.sponsor-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: var(--color-bg);
+    display: block;
+}
+
+/* ── PIE DE PÁGINA — minimalista, mismo tono que el encabezado ─────────────── */
+.site-footer {
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--space-xl);
+    padding-block: var(--space-lg);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.site-footer a {
+    text-decoration: none;
+    color: var(--color-text-muted);
+}
+
+.site-footer a:hover {
+    color: var(--color-accent);
+}
+
+.footer-nav {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding: 0;
+    margin-block: var(--space-md);
+}
+
+.newsletter-box {
+    padding-block: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-md);
+}
+
+.back-to-top,
+.floating-back-to-top {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0.4rem 0.8rem;
+}

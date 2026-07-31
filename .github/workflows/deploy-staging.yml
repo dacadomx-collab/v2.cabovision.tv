@@ -1,0 +1,58 @@
+name: Deploy a Staging (FTP) — CaboVision v2
+
+# ── TRIGGER ────────────────────────────────────────────────────────────────
+# Se activa en cada push a main. Despliegue automático hacia v2.cabovision.tv
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  web-deploy:
+    name: Build & Deploy FTP (Staging)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # Requerido por FTP-Deploy-Action para el diff incremental
+
+      # ── Sincronización FTP (solo archivos cambiados) ──────────────────────
+      - name: Sincronizar archivos con servidor FTP de staging
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:     ${{ secrets.FTP_SERVER }}
+          username:   ${{ secrets.FTP_USERNAME }}
+          password:   ${{ secrets.FTP_PASSWORD }}
+          server-dir: ./
+          protocol:   ftps
+          port:       21
+          # Exclusiones críticas — NO tocar .env remoto ni uploads ya existentes
+          exclude: |
+            **/.git/**
+            **/.git*
+            .env
+            .env.*
+            !.env.example
+            # Hot Storage real (patrón {tenant_id}/{YYYY}/{MM}/{DD}/*.ext, ver
+            # api/media_bridge.php) — NUNCA sobreescribir uploads ya migrados/probados
+            [0-9]*/[0-9][0-9][0-9][0-9]/**
+            knowledge/**
+            scripts/**
+            .claude/**
+            logs/**
+            backups/**
+            backups_y_pruebas/**
+            **/*.sql
+            **/*.log
+            **/*.md
+            !README.md
+            node_modules/**
+            vendor/**
+            **/*.zip
+            **/*.rar
+            **/*.bak
+            info.txt
+            CLAUDE.md
+            AGENTS.md

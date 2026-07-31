@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /knowledge/
+Disallow: /logs/
+Disallow: /scripts/
+Disallow: /modulos/
+Disallow: /database/
+
+# Sitemap: agregar aquí la URL absoluta de producción (ej. https://www.cabovision.tv/sitemap.php)
+# una vez confirmado el dominio final — no se hardcodeó localhost.

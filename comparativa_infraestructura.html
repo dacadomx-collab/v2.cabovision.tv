@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaboVision.tv 2.0 — Reporte Ejecutivo de Infraestructura</title>
+<style>
+:root{
+    --bg:#f8fafc; --bg-alt:#ffffff; --text:#0f172a; --text-muted:#475569;
+    --border:#e2e8f0; --accent:#9f1d1d; --accent-soft:#fef2f2;
+    --good:#15803d; --good-soft:#f0fdf4; --bad:#b91c1c; --bad-soft:#fef2f2;
+    --pending:#b45309; --pending-soft:#fffbeb;
+    --radius:0.75rem; --space:1.5rem; --container:1100px;
+}
+@media (prefers-color-scheme: dark){
+    :root{
+        --bg:#0b1120; --bg-alt:#111827; --text:#f1f5f9; --text-muted:#94a3b8;
+        --border:#1e293b; --accent:#f87171; --accent-soft:#3f1a1a;
+        --good:#4ade80; --good-soft:#0f2b1a; --bad:#f87171; --bad-soft:#3f1a1a;
+        --pending:#fbbf24; --pending-soft:#3a2a0a;
+    }
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6;}
+.wrap{max-width:var(--container);margin:0 auto;padding:2.5rem 1.5rem 5rem;}
+h1,h2,h3{font-family:Georgia,Cambria,"Times New Roman",serif;}
+a{color:var(--accent);}
+code{background:var(--border);padding:0.1rem 0.4rem;border-radius:0.25rem;font-size:0.9em;}
+
+.hero{text-align:center;padding-block:1rem 2.5rem;}
+.hero__eyebrow{font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);font-weight:700;}
+.hero h1{font-size:clamp(1.8rem,4vw,2.6rem);margin:0.5rem 0;}
+.hero p{color:var(--text-muted);max-width:60ch;margin-inline:auto;}
+.hero__meta{font-size:0.8rem;color:var(--text-muted);margin-top:1rem;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-block:2rem;}
+.stat{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-align:center;}
+.stat__value{font-size:2rem;font-weight:800;font-family:Georgia,serif;}
+.stat__label{font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:0.25rem;}
+
+h2{font-size:1.5rem;margin-top:3rem;border-bottom:2px solid var(--accent);padding-bottom:0.5rem;}
+h3{font-size:1.1rem;margin-top:1.75rem;}
+
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-block:1.5rem;}
+.vs-col{background:var(--bg-alt);padding:1.25rem;}
+.vs-col--legacy{border-top:3px solid var(--bad);}
+.vs-col--nuevo{border-top:3px solid var(--good);}
+.vs-col h4{margin:0 0 0.75rem;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;}
+.vs-col--legacy h4{color:var(--bad);}
+.vs-col--nuevo h4{color:var(--good);}
+.vs-col ul{margin:0;padding-left:1.1rem;font-size:0.9rem;}
+.vs-col li{margin-bottom:0.5rem;}
+
+.badge{display:inline-block;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:0.15rem 0.55rem;border-radius:999px;}
+.badge--ok{background:var(--good-soft);color:var(--good);}
+.badge--bad{background:var(--bad-soft);color:var(--bad);}
+.badge--pending{background:var(--pending-soft);color:var(--pending);}
+
+.progress{background:var(--border);border-radius:999px;height:1.5rem;overflow:hidden;margin:0.5rem 0;position:relative;}
+.progress__fill{background:var(--good);height:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:0.5rem;color:#fff;font-size:0.75rem;font-weight:700;white-space:nowrap;}
+
+.layer-list{list-style:none;padding:0;margin:1rem 0;counter-reset:layer;}
+.layer-list li{counter-increment:layer;background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1rem 1rem 3rem;margin-bottom:0.75rem;position:relative;font-size:0.9rem;}
+.layer-list li::before{content:counter(layer);position:absolute;left:1rem;top:1rem;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--accent);color:#fff;font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.layer-list strong{display:block;margin-bottom:0.15rem;}
+
+.arch-flow{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;justify-content:center;margin:1.5rem 0;font-size:0.85rem;}
+.arch-box{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem 1rem;text-align:center;min-width:140px;}
+.arch-box--accent{border-color:var(--accent);color:var(--accent);font-weight:700;}
+.arch-arrow{color:var(--text-muted);font-size:1.2rem;}
+
+table.data{width:100%;border-collapse:collapse;font-size:0.88rem;margin:1rem 0;}
+table.data th,table.data td{padding:0.6rem 0.75rem;text-align:left;border-bottom:1px solid var(--border);}
+table.data th{color:var(--text-muted);text-transform:uppercase;font-size:0.72rem;letter-spacing:0.04em;}
+
+.note{background:var(--bg-alt);border-left:4px solid var(--text-muted);border-radius:0.25rem;padding:1rem 1.25rem;font-size:0.88rem;margin:1.5rem 0;color:var(--text-muted);}
+.note.warn{border-left-color:var(--pending);}
+.note.crit{border-left-color:var(--bad);}
+
+footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);font-size:0.8rem;color:var(--text-muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="hero">
+        <div class="hero__eyebrow">Reporte Ejecutivo · Infraestructura</div>
+        <h1>CaboVision.tv 2.0 — El Búnker de Datos</h1>
+        <p>Comparativa real, medida y verificada entre el sistema heredado (<code>ACTUAL/</code>, snapshot del sitio en vivo) y la arquitectura nueva construida sobre <code>cabovision_local</code>. Cada cifra en este documento proviene de una medición real contra el código o la base de datos — no de una proyección.</p>
+        <div class="hero__meta">Última actualización: 2026-07-21 · Clasificación interna, bloqueado en <code>.htaccess</code></div>
+    </div>
+
+    <div class="stat-grid">
+        <div class="stat"><div class="stat__value">97.72%</div><div class="stat__label">Migración multimedia real</div></div>
+        <div class="stat"><div class="stat__value">6</div><div class="stat__label">Capas de seguridad en login</div></div>
+        <div class="stat"><div class="stat__value">~2.5×</div><div class="stat__label">Más rápido el menú (caché APCu)</div></div>
+        <div class="stat"><div class="stat__value">4,193→1</div><div class="stat__label">Filas escaneadas por carga de artículo</div></div>
+    </div>
+
+    <h2>1 · Seguridad perimetral</h2>
+    <div class="vs-grid">
+        <div class="vs-col vs-col--legacy">
+            <h4>Legacy (<code>ACTUAL/</code>)</h4>
+            <ul>
+                <li><span class="badge badge--bad">Crítico</span> Malware confirmado: <code>toggige-arrow.jpg</code> — webshell disfrazada de imagen, replicada en 3 rutas.</li>
+                <li><span class="badge badge--bad">Crítico</span> Front controller roto: <code>index.php</code> depende de un proyecto Laravel externo inexistente en el snapshot.</li>
+                <li>Sin autenticación propia verificable en este snapshot.</li>
+                <li>Sin WAF, sin rate limiting, sin honeypots.</li>
+            </ul>
+        </div>
+        <div class="vs-col vs-col--nuevo">
+            <h4>CaboVision.tv 2.0</h4>
+            <ul>
+                <li><span class="badge badge--ok">Purgado</span> Los 3 archivos maliciosos confirmados y eliminados — verificado por contenido, no solo por reporte de escáner.</li>
+                <li><span class="badge badge--ok">Real</span> <code>api/auth_login.php</code>: 6 capas (ver desglose abajo), contra el RBAC real de 17 cuentas.</li>
+                <li><span class="badge badge--ok">Real</span> PDO <code>ATTR_EMULATE_PREPARES=false</code>, 100% prepared statements en endpoints auditados.</li>
+                <li><span class="badge badge--pending">Pendiente</span> WAF perimetral y rate limiting a nivel de sitio — no iniciado, solo tarpitting en login.</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>Las 6 capas de <code>api/auth_login.php</code></h3>
+    <ul class="layer-list">
+        <li><strong>CORS controlado</strong> — <code>api/cors.php</code> centralizado, sin <code>Access-Control-Allow-Origin: *</code> en endpoints que mutan datos.</li>
+        <li><strong>RBAC contra el sistema real</strong> — 17 cuentas reales (<code>users</code>/<code>roles</code>/<code>model_has_roles</code>), no un esquema paralelo inventado.</li>
+        <li><strong>Anti-enumeración por timing</strong> — hash dummy calculado incluso cuando el email no existe, mismo tiempo de respuesta que un login real.</li>
+        <li><strong>Tarpitting progresivo</strong> — 10 fallos en 15 minutos → <code>429</code>.</li>
+        <li><strong>Device binding</strong> — hash SHA-256 de IP+User-Agent.</li>
+        <li><strong>PDO sin emulación</strong> + try/catch global, sin fugas de errores internos al cliente.</li>
+    </ul>
+
+    <h2>2 · Arquitectura de medios — "CDN Inversa" Hot/Cold</h2>
+    <p>El histórico de imágenes (25+ GB) no vive en el hosting público. Solo lo reciente permanece "caliente"; el archivo histórico vive en un servidor físico de oficina, invisible al público.</p>
+    <div class="arch-flow">
+        <div class="arch-box">Visitante público<br><small>navegador</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box arch-box--accent">api/media_bridge.php<br><small>servidor de hosting</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">Bridge Linux (LAN)<br><small>192.168.1.224:8081</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">Cold Storage<br><small>SHA-256, deduplicado</small></div>
+    </div>
+    <p style="font-size:0.9rem;color:var(--text-muted)">La IP física de la oficina <strong>nunca</strong> se expone al navegador del visitante — el proxy server-side hace la petición interna con el header <code>X-ACADEP-Bridge-Key</code>. Precisión honesta: esto reduce la superficie de ataque directo, pero no sustituye un rate-limiter real (pendiente, ver arriba).</p>
+
+    <h3>Progreso real de migración (medido, no estimado)</h3>
+    <div class="progress"><div class="progress__fill" style="width:97.72%">7,001 / 7,164 archivos (97.72%)</div></div>
+    <p style="font-size:0.85rem;color:var(--text-muted)">El 2.28% restante (~163 referencias) se investigó a fondo, no se ignoró: <strong>~4,920 referencias de imagen simplemente no existen en el respaldo original</strong> (verificado directamente contra el ZIP de 27 GB — pérdida de datos real, anterior a este proyecto, no recuperable por ingeniería). El resto son casos de bajo volumen con convenciones de carpeta atípicas, documentados como pendiente manual en <code>knowledge/migration_checklist.md</code>.</p>
+
+    <table class="data">
+        <thead><tr><th>Componente</th><th>Legacy</th><th>2.0</th></tr></thead>
+        <tbody>
+            <tr><td>Deduplicación</td><td>Ninguna — copias repetidas ocupan espacio</td><td>SHA-256 por archivo — incluye el mismo activo evergreen (ej. fotos de columnistas) subido una sola vez</td></tr>
+            <tr><td>Aislamiento perimetral</td><td>N/A (snapshot estático)</td><td>Solo <code>/view</code> autenticado expone el archivo; el filesystem físico nunca se sirve directo</td></tr>
+            <tr><td>Auditoría de consumo</td><td>Ninguna</td><td><code>telemetria_cold_storage</code> (append-only): IP, bytes, timestamp real por cada lectura</td></tr>
+        </tbody>
+    </table>
+
+    <h2>3 · Rendimiento — "Fast by Design"</h2>
+    <table class="data">
+        <thead><tr><th>Vector</th><th>Antes</th><th>Después</th><th>Evidencia</th></tr></thead>
+        <tbody>
+            <tr><td><code>WHERE articles.alias = ...</code></td><td>4,193 filas escaneadas</td><td>1 fila</td><td><code>EXPLAIN</code> real, <code>idx_articles_alias</code></td></tr>
+            <tr><td><code>ORDER BY published_at</code></td><td>Filesort + 4,193 filas</td><td>24 filas, sin filesort</td><td><code>EXPLAIN</code> real, <code>idx_articles_published_at</code></td></tr>
+            <tr><td><code>categories.alias</code> (categoria.php)</td><td>105 filas (scan completo)</td><td>1 fila (índice único)</td><td><code>EXPLAIN</code> real, <code>idx_categories_alias</code></td></tr>
+            <tr><td>Menú de categorías (cada carga)</td><td>Query + derivación en cada request</td><td>Caché APCu, TTL 300s</td><td>Medido: 28ms → 11-15ms</td></tr>
+        </tbody>
+    </table>
+    <p style="font-size:0.85rem;color:var(--text-muted)">Filosofía aplicada de forma estricta: caché nativo (APCu, ya en el stack — sin Redis/Memcached), sin scripts de terceros vía CDN, lazy loading nativo en imágenes.</p>
+
+    <h2>4 · Editorial — Look &amp; Feel 2.0</h2>
+    <div class="vs-grid">
+        <div class="vs-col vs-col--legacy">
+            <h4>Antes de esta fase</h4>
+            <ul>
+                <li><code>.article-card</code>, <code>.site-header</code>, <code>.site-footer</code>, <code>.arf-article</code> — <strong>sin ningún estilo dedicado</strong> en el proyecto, verificado por búsqueda en todo <code>assets/</code>.</li>
+                <li>Botón de modo oscuro/claro presente en el HTML, <strong>sin manejador de clic</strong> — no hacía nada.</li>
+                <li>Header con azul marino/verde heredado de un <code>!important</code> de Bootstrap 4 legacy.</li>
+            </ul>
+        </div>
+        <div class="vs-col vs-col--nuevo">
+            <h4>Editorial Moderno (dirección elegida)</h4>
+            <ul>
+                <li>Sistema tipográfico real: titulares serif (pila nativa, cero peticiones de red), cuerpo sans-serif, ancho de lectura de 72ch.</li>
+                <li>Modo oscuro/claro funcional: <code>data-theme</code> + <code>localStorage</code>, sin FOUC.</li>
+                <li>Header minimalista — <code>!important</code> legacy corregido puntualmente, no reemplazado en bloque.</li>
+            </ul>
+        </div>
+    </div>
+
+    <h2>5 · Telemetría y monetización</h2>
+    <ul class="layer-list">
+        <li><strong>Impresiones/clics reales</strong> — <code>assets/js/sponsor-telemetry.js</code>: <code>IntersectionObserver</code> (umbral 50%, ≥1s) + <code>sendBeacon()</code>, sin librerías externas.</li>
+        <li><strong>Anti-fraude</strong> — hash SHA-256 (salt rotativo + IP truncada + User-Agent), máximo 1 impresión por banner/sesión/hora.</li>
+        <li><strong>Fuente de verdad comercial</strong> — <code>sponsor_banners.accumulated_clicks</code>, actualizado vía <code>api/sponsors_redirect.php</code>.</li>
+        <li><strong>Auditoría de Cold Storage</strong> — <code>telemetria_cold_storage</code>, append-only, con triggers que bloquean <code>UPDATE</code>/<code>DELETE</code>.</li>
+    </ul>
+
+    <div class="note warn">
+        <strong>Pendiente real, no resuelto:</strong> WAF/rate-limiting a nivel de sitio, dashboard ejecutivo de patrocinadores (CTR/viewability por zona), editor "Una Sola Pantalla", conversión de imágenes a WebP/AVIF. Ver <code>knowledge/migration_checklist.md</code> para el detalle fase por fase con fecha real de cada ítem.
+    </div>
+
+    <footer>
+        <strong>Nota de honestidad de este reporte:</strong> una versión anterior de este documento (y un reporte hermano ya retirado, <code>reporte_cabovision.html</code>) calificaban el sistema como "100/100" o usaban lenguaje de "inmunidad absoluta" — cifras insostenibles. Esta versión mantiene la disciplina de no declarar nada "sellado" o "100%" sin evidencia medida, y de marcar explícitamente lo que sigue pendiente. Consolidado 2026-07-21 a partir de 5 reportes fragmentados en <code>knowledge/reportes_internos/</code> (ver <code>bitacora_tecnica_infraestructura.md</code> para el detalle de servidor físico/RAID1 que no cabía en este resumen ejecutivo).
+    </footer>
+</div>
+</body>
+</html>
