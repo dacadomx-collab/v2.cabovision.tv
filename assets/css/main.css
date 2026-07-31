@@ -394,6 +394,19 @@ video {
     color: var(--color-accent);
 }
 
+/* Fix contraste menú móvil (2026-07-31): #menu (off-canvas de #headerxs,
+   ver header.php) hereda color de <a> — bootstrap.css y app.css compiten
+   por esa herencia con reglas de igual especificidad (#dc3545 vs inherit),
+   frágil ante el orden exacto de carga. Selector por ID gana sin depender
+   de esa carrera, y sin !important (prohibido en el Codex del proyecto). */
+#menu a {
+    color: var(--color-text);
+}
+
+#menu a:hover {
+    color: var(--color-accent);
+}
+
 /* ── VIDEO EMBEBIDO (2026-07-23) — mismo criterio Zero-CLS que sponsor_banner.php:
    aspect-ratio reserva el espacio antes de que el iframe termine de cargar. */
 .video-embed {
