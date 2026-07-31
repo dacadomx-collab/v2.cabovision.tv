@@ -115,6 +115,12 @@ ServerSignature Off
     RewriteRule (^|/)helpers(/|$)             - [F,L,NC]
     RewriteRule (^|/)validators(/|$)          - [F,L,NC]
 
+    # Bloqueo global de ejecución de scripts en directorios de Hot Storage por
+    # tenant ({tenant_id}/{YYYY}/{MM}/{DD}/*.ext — ver api/media_bridge.php).
+    # Cubre automáticamente tenants futuros sin necesitar un .htaccess propio
+    # en cada carpeta numérica nueva (autorizado por el Arquitecto 2026-07-31).
+    RewriteRule ^([0-9]+)/.*\.php$ - [F,L]
+
     # ── NIVEL 3.5: SITEMAPS — URL limpia sin .php, requisito real de Google
     # News para /sitemap-news.xml (2026-07-24, autorizado explícitamente por
     # el Arquitecto). Sitemap general incluido de paso: mismo pendiente sin
