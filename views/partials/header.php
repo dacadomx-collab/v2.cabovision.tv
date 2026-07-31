@@ -174,7 +174,14 @@
             $yearPdo = $yearDb->getConnection();
             $row = $yearPdo->query('SELECT MIN(YEAR(`published_at`)) AS min_y, MAX(YEAR(`published_at`)) AS max_y FROM `articles`')
                 ->fetch(\PDO::FETCH_ASSOC);
-            return ['min' => (int) ($row['min_y'] ?? date('Y')), 'max' => (int) ($row['max_y'] ?? date('Y'))];
+            $minYear = (int) ($row['min_y'] ?? date('Y'));
+            $maxYear = (int) ($row['max_y'] ?? date('Y'));
+            // El techo nunca queda por debajo del año actual — el corpus
+            // migrado (2015-2019) no tiene notas recientes todavía, pero el
+            // equipo editorial ya puede publicar hoy mismo (admin/editor.php)
+            // y esas notas nacen con published_at = año en curso.
+            $maxYear = max($maxYear, (int) date('Y'));
+            return ['min' => $minYear, 'max' => $maxYear];
         });
     } catch (\PDOException $e) {
         error_log('[' . date('Y-m-d H:i:s') . '] [header.php date_filter] ' . $e->getMessage());
