@@ -130,7 +130,12 @@ function fetch_media_bytes(\PDO $pdo, string $relativePath): ?string
         curl_setopt_array($ch, [
             CURLOPT_HTTPHEADER     => ['X-ACADEP-Bridge-Key: ' . $bridgeKey],
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 6,
+            // Mientras el tunel publico de ACADEP no este activo, la IP LAN
+            // (192.168.1.224) es inalcanzable desde el hosting de staging —
+            // el timeout de conexion debe fallar rapido para no colgar el
+            // request de paginas con imagenes historicas (Cold Storage).
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT        => 5,
         ]);
         $body = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
