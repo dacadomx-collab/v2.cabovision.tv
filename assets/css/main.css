@@ -380,6 +380,20 @@ video {
     display: none;
 }
 
+/* Fix contraste iconos sociales (2026-07-31): assets/legacy/app.css fija
+   `.social{color:#fff}` sin depender del tema — en modo oscuro pasa
+   desapercibido (blanco sobre fondo oscuro), pero en modo claro los SVG
+   (fill="currentColor") quedan blancos sobre blanco, invisibles. Misma
+   especificidad que la regla legacy (una clase) — gana por orden de cascada,
+   ya que main.css se inyecta después de app.css en header.php. */
+.social {
+    color: var(--color-text);
+}
+
+.social:hover {
+    color: var(--color-accent);
+}
+
 /* ── VIDEO EMBEBIDO (2026-07-23) — mismo criterio Zero-CLS que sponsor_banner.php:
    aspect-ratio reserva el espacio antes de que el iframe termine de cargar. */
 .video-embed {

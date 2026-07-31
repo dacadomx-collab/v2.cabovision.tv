@@ -87,16 +87,39 @@ footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
     <div class="hero">
         <div class="hero__eyebrow">Reporte Ejecutivo · Infraestructura</div>
         <h1>CaboVision.tv 2.0 — El Búnker de Datos</h1>
-        <p>Comparativa real, medida y verificada entre el sistema heredado (<code>ACTUAL/</code>, snapshot del sitio en vivo) y la arquitectura nueva construida sobre <code>cabovision_local</code>. Cada cifra en este documento proviene de una medición real contra el código o la base de datos — no de una proyección.</p>
-        <div class="hero__meta">Última actualización: 2026-07-21 · Clasificación interna, bloqueado en <code>.htaccess</code></div>
+        <p>Comparativa real, medida y verificada entre el sistema heredado (<code>ACTUAL/</code>, snapshot del sitio en vivo) y la arquitectura nueva construida sobre <code>cabovision_local</code>, ya en vivo en staging (<code>v2.cabovision.tv</code>). Cada cifra en este documento proviene de una medición real contra el código, la base de datos o el propio servidor de staging — no de una proyección.</p>
+        <div class="hero__meta">Última actualización: 2026-07-31 · Clasificación interna, bloqueado en <code>.htaccess</code></div>
     </div>
 
     <div class="stat-grid">
-        <div class="stat"><div class="stat__value">97.72%</div><div class="stat__label">Migración multimedia real</div></div>
+        <div class="stat"><div class="stat__value">PHP 8.2</div><div class="stat__label">Runtime en staging (tipado <code>mixed</code>/<code>never</code>)</div></div>
+        <div class="stat"><div class="stat__value">10,713</div><div class="stat__label">Artículos en la BD unificada</div></div>
         <div class="stat"><div class="stat__value">6</div><div class="stat__label">Capas de seguridad en login</div></div>
+        <div class="stat"><div class="stat__value">97.72%</div><div class="stat__label">Migración multimedia real</div></div>
         <div class="stat"><div class="stat__value">~2.5×</div><div class="stat__label">Más rápido el menú (caché APCu)</div></div>
         <div class="stat"><div class="stat__value">4,193→1</div><div class="stat__label">Filas escaneadas por carga de artículo</div></div>
     </div>
+
+    <h2>0 · Runtime y despliegue continuo</h2>
+    <div class="vs-grid">
+        <div class="vs-col vs-col--legacy">
+            <h4>Antes del corte a staging</h4>
+            <ul>
+                <li><span class="badge badge--bad">Crítico</span> El hosting servía el proyecto con una versión de PHP anterior a 8.1 por defecto — <code>declare(strict_types=1)</code> con tipos <code>mixed</code> y <code>: never</code> (usados en <code>conexion.php</code>, <code>auth_login.php</code>, <code>helpers/response.php</code>) fallaban en tiempo de ejecución con <code>TypeError</code>, HTTP 500 en todo el sitio.</li>
+                <li>Despliegue manual por FTP — sin historial de qué se subió ni cuándo.</li>
+                <li><code>.env</code> remoto con credenciales de base de datos y <code>APP_URL</code> copiadas tal cual del entorno de desarrollo local — la app intentaba conectar a su propio <code>localhost</code> en vez de a la BD real.</li>
+            </ul>
+        </div>
+        <div class="vs-col vs-col--nuevo">
+            <h4>Staging hoy (<code>v2.cabovision.tv</code>)</h4>
+            <ul>
+                <li><span class="badge badge--ok">Real</span> PHP 8.2 confirmado en el hosting — compilación limpia, cero <code>TypeError</code> de tipado.</li>
+                <li><span class="badge badge--ok">Real</span> CI/CD real vía GitHub Actions (<code>.github/workflows/deploy-staging.yml</code>): cada <code>push</code> a <code>main</code> sincroniza por FTP, excluyendo explícitamente <code>.env</code> y el árbol de Hot Storage por tenant (<code>[0-9]*/[0-9][0-9][0-9][0-9]/**</code>) para no pisar credenciales ni uploads reales.</li>
+                <li><span class="badge badge--ok">Real</span> <code>helpers/base_path.php</code> resuelve el prefijo de ruta del sitio desde <code>APP_URL</code> (.env) en vez de hardcodear el subdirectorio de desarrollo — el mismo código sirve local y un dominio real sin ramas de código distintas.</li>
+            </ul>
+        </div>
+    </div>
+    <p style="font-size:0.85rem;color:var(--text-muted)">Precisión honesta: ambos incidentes (versión de PHP y credenciales de entorno local filtradas al <code>.env</code> remoto) se originaron por copiar configuración de desarrollo directo a staging sin adaptarla — ya corregido, pero documentado aquí sin maquillaje porque es la causa real detrás de dos caídas HTTP 500 durante este despliegue.</p>
 
     <h2>1 · Seguridad perimetral</h2>
     <div class="vs-grid">
@@ -130,6 +153,28 @@ footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
         <li><strong>PDO sin emulación</strong> + try/catch global, sin fugas de errores internos al cliente.</li>
     </ul>
 
+    <h2>1.5 · Base de datos — unificada y normalizada</h2>
+    <div class="vs-grid">
+        <div class="vs-col vs-col--legacy">
+            <h4>Legacy</h4>
+            <ul>
+                <li>Esquemas fragmentados entre distintos sitios/subdominios (<code>ACTUAL/</code>: <code>loscaboswelcome.cabovision.tv</code>, <code>kejutan.cabovision.tv</code> como snapshots separados, sin una fuente única).</li>
+                <li>Texto con mojibake confirmado (codificación mixta histórica) sin mecanismo de reparación.</li>
+                <li>Sin índices dedicados — <code>EXPLAIN</code> real mostraba scans completos de tabla (ver sección 3).</li>
+            </ul>
+        </div>
+        <div class="vs-col vs-col--nuevo">
+            <h4>v2 — <code>comunicabos_v2_cabovision.tv</code></h4>
+            <ul>
+                <li><span class="badge badge--ok">Real</span> Base única y relacional: 16 tablas (<code>articles</code>, <code>categories</code>, <code>users</code>, <code>roles</code>, <code>sponsor_banners</code>, <code>media_assets</code>, <code>security_intrusion_log</code>, <code>telemetria_cold_storage</code>, entre otras), migradas y verificadas contra staging el 2026-07-31.</li>
+                <li><span class="badge badge--ok">Real</span> 10,713 artículos, 105 categorías, 19 usuarios — conteo real post-importación, no estimado.</li>
+                <li><span class="badge badge--ok">Real</span> <code>repair_known_mojibake()</code> (<code>helpers/input_sanitizer.php</code>) aplicado en el punto único de lectura compartido por <code>header.php</code>/<code>footer.php</code>/listados, en vez de repetir la reparación en cada vista.</li>
+                <li><span class="badge badge--ok">Real</span> 100% de las mutaciones vía PDO <code>ATTR_EMULATE_PREPARES=false</code>, <code>api/conexion.php</code> centralizado (Mandamiento #11 del Codex del proyecto).</li>
+            </ul>
+        </div>
+    </div>
+    <p style="font-size:0.85rem;color:var(--text-muted)">Precisión honesta: la colación de origen mezcla <code>utf8mb4_unicode_ci</code> (tablas nuevas) con remanentes <code>latin1_swedish_ci</code> de la importación legacy — una conversión automática de charset durante el import podría corromper texto que hoy se ve correcto gracias a <code>repair_known_mojibake()</code>; se decidió preservar la colación mixta tal cual en vez de "arreglarla" a ciegas.</p>
+
     <h2>2 · Arquitectura de medios — "CDN Inversa" Hot/Cold</h2>
     <p>El histórico de imágenes (25+ GB) no vive en el hosting público. Solo lo reciente permanece "caliente"; el archivo histórico vive en un servidor físico de oficina, invisible al público.</p>
     <div class="arch-flow">
@@ -153,6 +198,7 @@ footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
             <tr><td>Deduplicación</td><td>Ninguna — copias repetidas ocupan espacio</td><td>SHA-256 por archivo — incluye el mismo activo evergreen (ej. fotos de columnistas) subido una sola vez</td></tr>
             <tr><td>Aislamiento perimetral</td><td>N/A (snapshot estático)</td><td>Solo <code>/view</code> autenticado expone el archivo; el filesystem físico nunca se sirve directo</td></tr>
             <tr><td>Auditoría de consumo</td><td>Ninguna</td><td><code>telemetria_cold_storage</code> (append-only): IP, bytes, timestamp real por cada lectura</td></tr>
+            <tr><td>Formatos next-gen (AVIF/WebP)</td><td>Ninguno — siempre el archivo original</td><td>Negociación real por header <code>Accept</code> en <code>api/media_bridge.php</code> (AVIF &gt; WebP &gt; original), convertido una vez y cacheado en disco — <span class="badge badge--pending" style="font-size:0.65rem">Alcance parcial</span> solo para imágenes servidas vía el bridge, no para Hot Storage directo</td></tr>
         </tbody>
     </table>
 
@@ -167,6 +213,25 @@ footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
         </tbody>
     </table>
     <p style="font-size:0.85rem;color:var(--text-muted)">Filosofía aplicada de forma estricta: caché nativo (APCu, ya en el stack — sin Redis/Memcached), sin scripts de terceros vía CDN, lazy loading nativo en imágenes.</p>
+
+    <h2>3.5 · Operatividad editorial y comercial</h2>
+    <div class="vs-grid">
+        <div class="vs-col vs-col--legacy">
+            <h4>Legacy</h4>
+            <ul>
+                <li>Sin editor propio verificable en el snapshot — dependía de un front controller Laravel externo inexistente.</li>
+                <li>Sin reporte de patrocinadores — ningún dato de impresiones/clics medible.</li>
+            </ul>
+        </div>
+        <div class="vs-col vs-col--nuevo">
+            <h4>v2</h4>
+            <ul>
+                <li><span class="badge badge--ok">Real</span> Editor "Una Sola Pantalla" (<code>admin/editor.php</code> + <code>api/articles_create.php</code>): título, slug auto-generado, extracto, video embebido (YouTube/Vimeo), contenido e imagen principal en un solo formulario, sin pestañas ni pasos.</li>
+                <li><span class="badge badge--ok">Real</span> Metadatos SEO/OpenGraph/JSON-LD (NewsArticle + BreadcrumbList) generados automáticamente en <code>articulo.php</code> a partir del artículo — cero campos manuales adicionales para el editor.</li>
+                <li><span class="badge badge--ok">Real</span> Dashboard B2B de patrocinadores (<code>admin/sponsors_dashboard.php</code> + <code>api/sponsors_report.php</code>): CTR e impresiones ya filtradas por viewability (≥1s visible), desglosadas por posición (<code>placement_type</code>: superior/lateral/intercalado).</li>
+            </ul>
+        </div>
+    </div>
 
     <h2>4 · Editorial — Look &amp; Feel 2.0</h2>
     <div class="vs-grid">
@@ -198,12 +263,17 @@ footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
     <div class="note ok">
         <strong>Resuelto (2026-07-31):</strong> WAF perimetral y rate-limiting a nivel de sitio — <code>helpers/security_shield.php</code> (firmas SQLi/XSS/traversal + límite de tasa por IP con degradación segura) ya cubre las 3 rutas públicas (<code>index.php</code>, <code>articulo.php</code>, <code>categoria.php</code>) y las 7 vistas de <code>admin/</code>, además de todo <code>api/</code> vía <code>cors.php</code>. Commit <code>35d6ef7</code>.
     </div>
+    <div class="note ok">
+        <strong>Corregido en esta revisión (2026-07-31):</strong> el dashboard B2B de patrocinadores y el editor "Una Sola Pantalla" figuraban aquí como pendientes en la versión anterior de este reporte — verificado directamente contra el código, ambos ya están construidos y funcionales (ver sección 3.5). El reporte simplemente no se había actualizado desde que se terminaron.
+    </div>
     <div class="note warn">
-        <strong>Pendiente real, no resuelto:</strong> dashboard ejecutivo de patrocinadores (CTR/viewability por zona), editor "Una Sola Pantalla", conversión de imágenes a WebP/AVIF. Ver <code>knowledge/migration_checklist.md</code> para el detalle fase por fase con fecha real de cada ítem.
+        <strong>Pendiente real, no resuelto:</strong> conversión de imágenes a WebP/AVIF solo para el flujo de <code>media_bridge.php</code> (Cold Storage) — el Hot Storage servido directo aún no negocia formato. WAF a nivel de Apache/red (lo existente es aplicativo, en PHP, no un WAF de borde). Ver <code>knowledge/migration_checklist.md</code> para el detalle fase por fase con fecha real de cada ítem.
     </div>
 
     <footer>
         <strong>Nota de honestidad de este reporte:</strong> una versión anterior de este documento (y un reporte hermano ya retirado, <code>reporte_cabovision.html</code>) calificaban el sistema como "100/100" o usaban lenguaje de "inmunidad absoluta" — cifras insostenibles. Esta versión mantiene la disciplina de no declarar nada "sellado" o "100%" sin evidencia medida, y de marcar explícitamente lo que sigue pendiente. Consolidado 2026-07-21 a partir de 5 reportes fragmentados en <code>knowledge/reportes_internos/</code> (ver <code>bitacora_tecnica_infraestructura.md</code> para el detalle de servidor físico/RAID1 que no cabía en este resumen ejecutivo).
+        <br><br>
+        <strong>Actualización 2026-07-31:</strong> se corrigieron dos ítems que esta misma disciplina exige señalar en cualquier dirección — no solo lo que sigue mal, sino lo que se había marcado como pendiente y ya no lo estaba (editor "Una Sola Pantalla", dashboard B2B). Se añadió la sección 0 documentando dos incidentes reales de despliegue (versión de PHP y credenciales/URL de entorno local filtradas al <code>.env</code> remoto) sin maquillaje, porque fueron la causa real de dos caídas del sitio en staging.
     </footer>
 </div>
 </body>
