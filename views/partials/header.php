@@ -213,17 +213,16 @@
         propia época y sí heredar esos estilos dentro del cuerpo del artículo
         — eso es correcto, es contenido de esa misma plantilla.
     -->
-    <!-- Rendimiento Front-End Extremo (2026-07-21): bootstrap.css/app.css
-         (113 KB combinados, solo mecánica de grid/dropdown, no crítico para
-         el primer pintado) se difieren con preload+swap — no bloquean el
-         render. Van PRIMERO en el DOM a propósito (ver nota de arriba: deben
-         perder los empates de especificidad contra main.css). -->
-    <link rel="preload" href="<?= base_path() ?>/assets/legacy/bootstrap.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="<?= base_path() ?>/assets/legacy/app.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="<?= base_path() ?>/assets/legacy/bootstrap.css">
-        <link rel="stylesheet" href="<?= base_path() ?>/assets/legacy/app.css">
-    </noscript>
+    <!-- Carga bloqueante (2026-08-01, revertido desde preload+swap) —
+         bootstrap.css/app.css dan la mecánica real del menú (grid, dropdowns,
+         hamburguesa móvil). Con preload+swap el menú se pintaba sin estos
+         estilos durante los primeros ~50-100ms (F5 real, no cosmético) hasta
+         que el "onload" hacía el swap — efecto FOUC visible en el menú.
+         Se prioriza maquetación sólida desde el primer pintado sobre esos
+         ~100ms de ahorro. Van PRIMERO en el DOM a propósito (ver nota de
+         arriba: deben perder los empates de especificidad contra main.css). -->
+    <link rel="stylesheet" href="<?= base_path() ?>/assets/legacy/bootstrap.css">
+    <link rel="stylesheet" href="<?= base_path() ?>/assets/legacy/app.css">
 
     <!-- Critical CSS inline: main.css (10 KB, nuestro sistema real de diseño)
          directo aquí, sin request de red, cero FOUC — y en posición POSTERIOR
