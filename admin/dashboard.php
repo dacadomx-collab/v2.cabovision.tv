@@ -74,6 +74,8 @@ waf_block_if_malicious();
             <a href="<?= base_path() ?>/admin/editor.php">Editor</a>
             <a href="<?= base_path() ?>/admin/dashboard.php" class="is-active">Patrocinadores</a>
             <a href="<?= base_path() ?>/admin/sponsors_dashboard.php">Dashboard B2B</a>
+            <a href="<?= base_path() ?>/admin/categorias.php">Categorías</a>
+            <a href="<?= base_path() ?>/admin/candidatos.php">Candidatos</a>
             <a href="<?= base_path() ?>/admin/users.php">Usuarios</a>
         </nav>
         <button type="button" id="logout-btn">Cerrar sesión</button>

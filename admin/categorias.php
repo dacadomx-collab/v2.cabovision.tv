@@ -3,13 +3,10 @@
 declare(strict_types=1);
 
 // =============================================================================
-// admin/users.php — Panel de Usuarios, exclusivo del Super Admin (rol
-// "Admin"). Alta de nuevas cuentas con rol asignado — assets/js/users.js hace
-// la verificación real de rol vía requireRole(['Admin']) del lado servidor
-// (api/users_create.php); este panel puede mostrarse a cualquier sesión
-// válida, pero el formulario simplemente fallará con 403 si el rol no
-// califica — la autoridad real vive siempre en el backend (MODULO_01 §2,
-// nunca confiar en ocultar un botón como control de acceso).
+// admin/categorias.php — Gestión de Categorías (crear/editar), exclusivo del
+// rol Admin — portado desde el sistema legacy (Admin\CategoryController,
+// routes/web.php bajo middleware ['admin']). Antes v2 solo LEÍA categorías
+// (api/categories_list.php); este panel cierra ese gap real.
 // =============================================================================
 
 require_once __DIR__ . '/../helpers/security_shield.php';
@@ -26,7 +23,7 @@ waf_block_if_malicious();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Usuarios — CaboVision.tv</title>
+<title>Categorías — CaboVision.tv</title>
 <link rel="icon" href="<?= base_path() ?>/favicon.ico">
 <script>window.BASE_PATH = "<?= htmlspecialchars(base_path(), ENT_QUOTES, 'UTF-8') ?>";</script>
 <style><?= file_get_contents(__DIR__ . '/../assets/css/main.css') ?></style>
@@ -48,78 +45,79 @@ waf_block_if_malicious();
     }
     .editor-field { margin-bottom: var(--space-sm); }
     .editor-field label { display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.03em; }
-    .editor-field input, .editor-field select {
+    .editor-field input, .editor-field select, .editor-field textarea {
         width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius);
         background: var(--color-bg-alt); color: var(--color-text); font-size: 0.95rem; font-family: var(--font-body);
     }
+    .editor-field textarea { min-height: 90px; resize: vertical; }
     .editor-field label.checkbox-label { display: flex; align-items: center; gap: 0.4rem; text-transform: none; font-size: 0.9rem; color: var(--color-text); }
     .editor-actions button {
         padding: 0.65rem 1.5rem; border: none; border-radius: var(--radius); background: var(--color-accent);
         color: var(--color-accent-contrast); font-weight: 700; cursor: pointer;
     }
-    #user-feedback { margin-top: var(--space-sm); font-size: 0.9rem; }
-    .temp-password-box {
-        margin-top: var(--space-sm); padding: 0.85rem 1rem; border-radius: var(--radius);
-        background: var(--color-bg-alt); border-left: 4px solid var(--color-accent); font-size: 0.9rem;
-    }
-    .temp-password-box code { font-size: 1rem; font-weight: 700; }
+    #category-feedback { margin-top: var(--space-sm); font-size: 0.9rem; }
 
     table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: var(--space-md); }
     table.admin-table th, table.admin-table td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--color-border); }
     table.admin-table th { color: var(--color-text-muted); text-transform: uppercase; font-size: 0.7rem; }
+    table.admin-table a.edit-link { color: var(--color-accent); font-weight: 600; text-decoration: none; }
 </style>
 </head>
 <body>
 <div class="admin-shell">
     <div class="admin-topbar">
-        <h1>Usuarios</h1>
+        <h1>Categorías</h1>
         <nav>
             <a href="<?= base_path() ?>/admin/editor.php">Editor</a>
             <a href="<?= base_path() ?>/admin/dashboard.php">Patrocinadores</a>
             <a href="<?= base_path() ?>/admin/sponsors_dashboard.php">Dashboard B2B</a>
-            <a href="<?= base_path() ?>/admin/categorias.php">Categorías</a>
+            <a href="<?= base_path() ?>/admin/categorias.php" class="is-active">Categorías</a>
             <a href="<?= base_path() ?>/admin/candidatos.php">Candidatos</a>
-            <a href="<?= base_path() ?>/admin/users.php" class="is-active">Usuarios</a>
+            <a href="<?= base_path() ?>/admin/users.php">Usuarios</a>
         </nav>
         <button type="button" id="logout-btn">Cerrar sesión</button>
     </div>
 
     <section>
-        <h2>Crear Usuario</h2>
-        <form id="user-form">
+        <h2 id="form-title">Crear Categoría</h2>
+        <form id="category-form">
+            <input type="hidden" id="category_id" value="">
             <div class="editor-grid">
                 <div class="editor-field">
-                    <label for="name">Nombre completo</label>
+                    <label for="name">Nombre</label>
                     <input type="text" id="name" required maxlength="255">
                 </div>
                 <div class="editor-field">
-                    <label for="email">Correo electrónico</label>
-                    <input type="email" id="email" required maxlength="150">
+                    <label for="parent_id">Categoría padre (opcional)</label>
+                    <select id="parent_id">
+                        <option value="">— Ninguna (categoría de primer nivel) —</option>
+                    </select>
+                </div>
+                <div class="editor-field" style="grid-column: 1 / -1">
+                    <label for="description">Descripción</label>
+                    <textarea id="description" maxlength="2000"></textarea>
                 </div>
                 <div class="editor-field">
-                    <label for="role_id">Rol</label>
-                    <select id="role_id" required></select>
-                </div>
-                <div class="editor-field">
-                    <label class="checkbox-label"><input type="checkbox" id="send_welcome_email" checked> Enviar correo de bienvenida</label>
+                    <label class="checkbox-label"><input type="checkbox" id="publish" checked> Publicada (visible en el menú)</label>
                 </div>
             </div>
             <div class="editor-actions">
-                <button type="submit">Crear usuario</button>
+                <button type="submit" id="submit-btn">Crear categoría</button>
+                <button type="button" id="cancel-edit-btn" hidden>Cancelar edición</button>
             </div>
-            <p id="user-feedback" hidden></p>
+            <p id="category-feedback" hidden></p>
         </form>
     </section>
 
     <section>
-        <h2>Usuarios existentes</h2>
+        <h2>Categorías existentes</h2>
         <table class="admin-table">
-            <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Alta</th></tr></thead>
-            <tbody id="users-table-body"><tr><td colspan="5">Cargando…</td></tr></tbody>
+            <thead><tr><th>Nombre</th><th>Padre</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="categories-table-body"><tr><td colspan="4">Cargando…</td></tr></tbody>
         </table>
     </section>
 </div>
 <script src="<?= base_path() ?>/assets/js/admin.js"></script>
-<script src="<?= base_path() ?>/assets/js/users.js" defer></script>
+<script src="<?= base_path() ?>/assets/js/categorias.js" defer></script>
 </body>
 </html>
