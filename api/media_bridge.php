@@ -183,6 +183,14 @@ if ($body !== null) {
     exit;
 }
 
-http_response_code(302);
-header('Location: ' . media_placeholder_path());
+// Fallback seguro (2026-08-01) — antes redirigia 302 al placeholder; ahora
+// sirve el archivo real con 200 OK directo, igual que serve_legacy_path()
+// Capa 3. Cualquier fallo del bridge Cold (400/404/500/timeout, ya
+// capturado silenciosamente dentro de fetch_media_bytes()) cae aqui.
+$placeholderFile = dirname(__DIR__) . '/assets/img/logocabovis_glow.png';
+header('Cache-Control: public, max-age=300');
+header('Content-Type: image/png');
+if (is_file($placeholderFile)) {
+    readfile($placeholderFile);
+}
 exit;
