@@ -781,3 +781,109 @@ video {
     padding: 0;
     font-size: 1.1rem;
 }
+
+/* ==== Directorio público de Candidatos (candidatos.php) ==== */
+.candidates-section {
+    margin-bottom: var(--space-lg);
+}
+
+.candidates-section h2 {
+    font-family: var(--font-headline);
+    font-size: 1.2rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-sm);
+}
+
+.candidates-section__map-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+.candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-sm);
+}
+
+.candidate-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-bg-alt);
+}
+
+.candidate-card__photo {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--color-border);
+}
+
+.candidate-card__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.candidate-card__name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.candidate-card__party {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ==== Secciones curadas de portada (index.php) ==== */
+.homepage-section {
+    margin-bottom: var(--space-lg);
+}
+
+.homepage-section__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
+}
+
+.homepage-section__title {
+    font-family: var(--font-headline);
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+.homepage-section__more {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.homepage-section__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-md);
+}

@@ -267,6 +267,7 @@
                 <span></span>
                 <ul id="menu">
                     <li><a href="<?= base_path() ?>/index.php">Portada</a></li>
+                    <li><a href="<?= base_path() ?>/candidatos.php">Candidatos</a></li>
                     <?php foreach ($mainMenuCurated as $entry): ?>
                         <li><a href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($entry['category']['alias']) ?>"><?= htmlspecialchars($entry['category']['name'], ENT_QUOTES, 'UTF-8') ?></a></li>
                         <?php foreach ($entry['children'] as $child): ?>
@@ -323,6 +324,9 @@
                 <ul class="navbar-nav" id="main-nav">
                     <li class="nav-item active">
                         <a class="nav-link" href="<?= base_path() ?>/index.php">Portada</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= base_path() ?>/candidatos.php">Candidatos</a>
                     </li>
                     <?php foreach ($mainMenuCurated as $entry): ?>
                         <?php $cat = $entry['category']; $children = $entry['children']; ?>

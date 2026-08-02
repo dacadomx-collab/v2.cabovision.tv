@@ -15,6 +15,7 @@ require_once __DIR__ . '/helpers/input_sanitizer.php';
 require_once __DIR__ . '/helpers/security_shield.php';
 require_once __DIR__ . '/helpers/base_path.php';
 require_once __DIR__ . '/helpers/date_filter.php';
+require_once __DIR__ . '/helpers/homepage_sections.php';
 
 if (is_ip_banned()) {
     http_response_code(403);
@@ -63,6 +64,12 @@ foreach ($articles as &$articleRow) {
 }
 unset($articleRow);
 
+// Portada curada por secciones — solo en la vista por defecto (sin paginar,
+// sin filtro de fecha activo); en cualquier otra vista de index.php el
+// visitante ya pidió algo específico (página 2+, un rango de fechas) y
+// mezclarlo con bloques curados de otras categorías sería ruido, no ayuda.
+$homepageSections = ($page === 1 && $dateFilter === null) ? fetch_homepage_sections($pdo) : [];
+
 $pageTitle = 'CaboVision.tv — Noticias de Los Cabos y Baja California Sur';
 
 require __DIR__ . '/views/partials/header.php';
@@ -91,6 +98,21 @@ require __DIR__ . '/views/partials/header.php';
                 <a href="<?= base_path() ?>/index.php?page=<?= $page + 1 ?><?= $dateFilterQuery ?>">Siguiente &rarr;</a>
             <?php endif; ?>
         </nav>
+
+        <?php foreach ($homepageSections as $section): ?>
+            <section class="homepage-section">
+                <div class="homepage-section__header">
+                    <h2 class="homepage-section__title"><?= htmlspecialchars($section['title'], ENT_QUOTES, 'UTF-8') ?></h2>
+                    <a class="homepage-section__more" href="<?= base_path() ?>/categoria.php?alias=<?= urlencode($section['category_alias']) ?>">Ver todo &rarr;</a>
+                </div>
+                <div class="homepage-section__grid">
+                    <?php foreach ($section['articles'] as $article): ?>
+                        <?php $isPriorityCard = false; ?>
+                        <?php include __DIR__ . '/views/partials/article_card.php'; ?>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        <?php endforeach; ?>
     </div>
 
     <aside class="arf-layout__aside">
