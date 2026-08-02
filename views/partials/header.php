@@ -196,6 +196,7 @@
     ?>
 
     <link rel="icon" href="<?= base_path() ?>/favicon.ico">
+    <link rel="alternate" type="application/rss+xml" title="CaboVision.tv — Últimas noticias" href="<?= base_path() ?>/rss.php">
 
     <!--
         NOTA DE ARQUITECTURA — orden de cascada crítico, no accidental:

@@ -36,40 +36,7 @@ if (!preg_match('#^\d+/\d{4}/\d{2}/\d{2}/[\w\-.]+\.(jpg|jpeg|png|webp)$#i', $pat
 /** Recorta $bytes a exactamente OG_WIDTHxOG_HEIGHT ("cover", sin distorsión) y lo codifica en $format. */
 function build_og_crop(string $bytes, string $format): string|false
 {
-    $src = @imagecreatefromstring($bytes);
-    if ($src === false) {
-        return false;
-    }
-
-    $srcW = imagesx($src);
-    $srcH = imagesy($src);
-    $targetRatio = OG_WIDTH / OG_HEIGHT;
-    $srcRatio    = $srcW / $srcH;
-
-    if ($srcRatio > $targetRatio) {
-        // Fuente más ancha que el objetivo — se recorta el ancho, se conserva el alto completo.
-        $cropH = $srcH;
-        $cropW = (int) round($srcH * $targetRatio);
-        $cropX = (int) round(($srcW - $cropW) / 2);
-        $cropY = 0;
-    } else {
-        // Fuente más alta (o igual) que el objetivo — se recorta el alto, se conserva el ancho completo.
-        $cropW = $srcW;
-        $cropH = (int) round($srcW / $targetRatio);
-        $cropX = 0;
-        $cropY = (int) round(($srcH - $cropH) / 2);
-    }
-
-    $dst = imagecreatetruecolor(OG_WIDTH, OG_HEIGHT);
-    imagecopyresampled($dst, $src, 0, 0, $cropX, $cropY, OG_WIDTH, OG_HEIGHT, $cropW, $cropH);
-    imagedestroy($src);
-
-    ob_start();
-    $ok = $format === 'avif' ? @imageavif($dst, null, 60) : ($format === 'webp' ? @imagewebp($dst, null, 82) : @imagejpeg($dst, null, 85));
-    $encoded = ob_get_clean();
-    imagedestroy($dst);
-
-    return $ok !== false && $encoded !== '' ? $encoded : false;
+    return build_cover_crop($bytes, OG_WIDTH, OG_HEIGHT, $format);
 }
 
 $database = new Database();

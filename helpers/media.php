@@ -49,6 +49,48 @@ function media_lookup_tier(string $relativePath): ?string
     return $cache[$relativePath] = ($tier !== false ? (string) $tier : null);
 }
 
+/**
+ * Recorta $bytes a exactamente {$width}x{$height} ("cover", sin distorsión) y
+ * lo codifica en $format — extraído de api/og_image.php (2026-08-01) para que
+ * api/thumb.php reutilice EXACTAMENTE la misma lógica de recorte en vez de
+ * duplicarla (Mandamiento #10).
+ */
+function build_cover_crop(string $bytes, int $width, int $height, string $format): string|false
+{
+    $src = @imagecreatefromstring($bytes);
+    if ($src === false) {
+        return false;
+    }
+
+    $srcW = imagesx($src);
+    $srcH = imagesy($src);
+    $targetRatio = $width / $height;
+    $srcRatio    = $srcW / $srcH;
+
+    if ($srcRatio > $targetRatio) {
+        $cropH = $srcH;
+        $cropW = (int) round($srcH * $targetRatio);
+        $cropX = (int) round(($srcW - $cropW) / 2);
+        $cropY = 0;
+    } else {
+        $cropW = $srcW;
+        $cropH = (int) round($srcW / $targetRatio);
+        $cropX = 0;
+        $cropY = (int) round(($srcH - $cropH) / 2);
+    }
+
+    $dst = imagecreatetruecolor($width, $height);
+    imagecopyresampled($dst, $src, 0, 0, $cropX, $cropY, $width, $height, $cropW, $cropH);
+    imagedestroy($src);
+
+    ob_start();
+    $ok = $format === 'avif' ? @imageavif($dst, null, 60) : ($format === 'webp' ? @imagewebp($dst, null, 82) : @imagejpeg($dst, null, 85));
+    $encoded = ob_get_clean();
+    imagedestroy($dst);
+
+    return $ok !== false && $encoded !== '' ? $encoded : false;
+}
+
 function resolve_media_path(?string $dbPath): string
 {
     $placeholder = media_placeholder_path();

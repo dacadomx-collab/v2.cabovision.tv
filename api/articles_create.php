@@ -31,6 +31,8 @@ require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/../helpers/response.php';
 require_once __DIR__ . '/../helpers/input_sanitizer.php';
 require_once __DIR__ . '/../helpers/asfl_logger.php';
+require_once __DIR__ . '/../helpers/mailer.php';
+require_once __DIR__ . '/../helpers/mail_templates.php';
 
 const STATUS_PENDIENTE   = 0;
 const MEDIA_TENANT_ID    = 1002; // Misma constante que ColdStorageClient/link_articles_media.php (Mandamiento #10)
@@ -234,6 +236,30 @@ try {
     // categoría) cada vez que se sirve la página. Guardar una copia estática
     // en el INSERT la dejaría desactualizada si el artículo se edita después
     // — se automatiza en el lugar correcto (al servir), no al ingerir.
+    // Aviso editorial (2026-08-01) — reemplaza el correo hardcodeado a un solo
+    // destinatario que hacía el sistema legacy: aquí se notifica a TODOS los
+    // usuarios con rol Admin o Editor (quienes pueden publicar), salvo al
+    // propio autor. Best-effort vía send_transactional_email() — si el correo
+    // falla (ej. SMTP sin configurar), NUNCA bloquea la creación de la nota.
+    $reviewersStmt = $pdo->prepare(
+        "SELECT DISTINCT u.name, u.email
+         FROM `users` u
+         INNER JOIN `model_has_roles` mhr ON mhr.model_id = u.id AND mhr.model_type = 'App\\\\User'
+         INNER JOIN `roles` r ON r.id = mhr.role_id
+         WHERE r.name IN ('Admin', 'Editor') AND u.id != :author_id"
+    );
+    $reviewersStmt->execute([':author_id' => $userId]);
+    $envForUrl = parse_ini_file(dirname(__DIR__) . '/.env', false, INI_SCANNER_RAW) ?: [];
+    $reviewUrl = rtrim((string) ($envForUrl['APP_URL'] ?? ''), '/') . '/admin/editor.php?id=' . $newId;
+    foreach ($reviewersStmt->fetchAll(\PDO::FETCH_ASSOC) as $reviewer) {
+        send_transactional_email(
+            (string) $reviewer['email'],
+            (string) $reviewer['name'],
+            'Nota pendiente de revisión: ' . $title,
+            build_pending_article_email_html($title, (string) ($authPayload['name'] ?? 'Un colaborador'), $reviewUrl)
+        );
+    }
+
     asfl_log('RESPONSE', ['endpoint' => 'articles_create.php', 'status' => 'success', 'id' => $newId]);
 
     send_success('Noticia creada como borrador (pendiente de publicación).', [

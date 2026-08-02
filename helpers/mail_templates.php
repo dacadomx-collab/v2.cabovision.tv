@@ -80,3 +80,59 @@ function build_password_reset_email_html(string $resetUrl, string $userName, int
 </table>
 HTML;
 }
+
+/**
+ * Plantilla de aviso de nota pendiente de revisión — reemplaza el flujo
+ * legacy (Mail::send('admin.articles.email-template', ...) en
+ * Admin\ArticleController::store()), que solo avisaba a un correo hardcodeado.
+ * Aquí se envía a cada usuario con rol Admin/Editor (ver articles_create.php).
+ */
+function build_pending_article_email_html(string $articleTitle, string $authorName, string $reviewUrl): string
+{
+    $env    = parse_ini_file(dirname(__DIR__) . '/.env', false, INI_SCANNER_RAW) ?: [];
+    $appUrl = (string) ($env['APP_URL'] ?? 'http://localhost/CaboVision.tv');
+    $logoUrl = $appUrl . '/assets/img/logocabovis_glow.png';
+
+    $safeTitle  = htmlspecialchars($articleTitle, ENT_QUOTES, 'UTF-8');
+    $safeAuthor = htmlspecialchars($authorName, ENT_QUOTES, 'UTF-8');
+    $safeUrl    = htmlspecialchars($reviewUrl, ENT_QUOTES, 'UTF-8');
+
+    return <<<HTML
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#10141E;padding:32px 16px;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#1a1f2e;border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+                <tr>
+                    <td style="padding:28px 32px 0 32px;" align="center">
+                        <img src="{$logoUrl}" alt="CaboVision.tv" width="160" style="display:block;">
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:24px 32px 8px 32px;color:#f5f5f5;font-size:18px;font-weight:bold;">
+                        Nota pendiente de revisión
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:0 32px 20px 32px;color:#c7cbd4;font-size:14px;line-height:1.6;">
+                        {$safeAuthor} envió "<strong>{$safeTitle}</strong>" y quedó como borrador, lista para tu revisión.
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:0 32px 24px 32px;" align="center">
+                        <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="background-color:#8a1f2b;border-radius:6px;">
+                                    <a href="{$safeUrl}" style="display:inline-block;padding:12px 28px;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;">
+                                        Ir al panel de edición
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+HTML;
+}

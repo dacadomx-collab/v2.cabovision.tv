@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 // =============================================================================
 // api/articles_list.php — Listado paginado de noticias publicadas
-// Endpoint: GET /api/articles_list.php?page=1&per_page=12&category=politica
+// Endpoint: GET /api/articles_list.php?page=1&per_page=12&category=politica&search=texto
 // Auth: Público (Mandamiento #14 — solo mutaciones exigen JWT)
 //
 // Schema real (knowledge/02_CODEX_Y_SCHEMA_MAESTRO.md):
@@ -32,6 +32,7 @@ $page          = max(1, sanitize_int($_GET['page'] ?? 1, 1));
 $perPage       = min(30, max(1, sanitize_int($_GET['per_page'] ?? 12, 12)));
 $offset        = ($page - 1) * $perPage;
 $categoryAlias = sanitize_string((string) ($_GET['category'] ?? ''), 255);
+$search        = sanitize_string((string) ($_GET['search'] ?? ''), 255);
 
 try {
     $database = new Database();
@@ -39,10 +40,15 @@ try {
 
     $params = [':status_id' => STATUS_PUBLICADO];
     $categoryFilter = '';
+    $searchFilter   = '';
 
     if ($categoryAlias !== '') {
         $categoryFilter = 'AND `categories`.`alias` = :category_alias';
         $params[':category_alias'] = $categoryAlias;
+    }
+    if ($search !== '') {
+        $searchFilter = 'AND `articles`.`title` LIKE :search';
+        $params[':search'] = '%' . $search . '%';
     }
 
     $stmt = $pdo->prepare(
@@ -52,7 +58,7 @@ try {
                 `categories`.`name` AS `category_name`, `categories`.`alias` AS `category_alias`
          FROM `articles`
          INNER JOIN `categories` ON `categories`.`id` = `articles`.`category_id`
-         WHERE `articles`.`status_id` = :status_id {$categoryFilter}
+         WHERE `articles`.`status_id` = :status_id {$categoryFilter} {$searchFilter}
          ORDER BY `articles`.`published_at` DESC
          LIMIT {$perPage} OFFSET {$offset}"
     );
@@ -63,7 +69,7 @@ try {
         "SELECT COUNT(*) AS `total`
          FROM `articles`
          INNER JOIN `categories` ON `categories`.`id` = `articles`.`category_id`
-         WHERE `articles`.`status_id` = :status_id {$categoryFilter}"
+         WHERE `articles`.`status_id` = :status_id {$categoryFilter} {$searchFilter}"
     );
     $countStmt->execute($params);
     $total = (int) $countStmt->fetch(\PDO::FETCH_ASSOC)['total'];

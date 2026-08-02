@@ -11,9 +11,17 @@ require_once __DIR__ . '/../../helpers/media.php';
 require_once __DIR__ . '/../../helpers/base_path.php';
 $isPriorityCard = $isPriorityCard ?? false;
 $mediaPlaceholder = media_placeholder_path();
-$thumb = resolve_media_path($article['thumbnail'] ?? null) !== $mediaPlaceholder
-    ? resolve_media_path($article['thumbnail'] ?? null)
-    : resolve_media_path($article['image'] ?? null);
+$rawThumbPath = (string) ($article['thumbnail'] ?? '');
+// api/thumb.php solo acepta la ruta canonica {tenant}/{Y}/{m}/{d}/{archivo} que
+// produce articles_create.php — el material migrado del legacy con rutas
+// distintas (ej. "1000/2020/Enero/...") sigue usando el original tal cual,
+// sin recorte on-demand, para no romper miniaturas historicas.
+$thumbIsCanonical = (bool) preg_match('#^\d+/\d{4}/\d{2}/\d{2}/[\w\-.]+\.(jpg|jpeg|png|webp)$#i', $rawThumbPath);
+$thumb = $thumbIsCanonical
+    ? base_path() . '/api/thumb.php?path=' . rawurlencode($rawThumbPath) . '&w=600&h=400'
+    : (resolve_media_path($rawThumbPath ?: null) !== $mediaPlaceholder
+        ? resolve_media_path($rawThumbPath ?: null)
+        : resolve_media_path($article['image'] ?? null));
 $isFallback = $thumb === $mediaPlaceholder;
 ?>
 <article class="card arf-col-3 article-card">
