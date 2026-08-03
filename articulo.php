@@ -161,6 +161,21 @@ require __DIR__ . '/views/partials/header.php';
         <?= htmlspecialchars((new DateTimeImmutable((string) $article['published_at']))->format('d/m/Y'), ENT_QUOTES, 'UTF-8') ?>
     </p>
 
+    <?php
+    // Botones de compartir — enlaces planos a los endpoints públicos de
+    // "sharer" de cada red (sin SDK/pixel de terceros cargado en la página,
+    // mismo criterio "Fast by Design" que ya retiró swiper.min.js): cada uno
+    // abre su propio diálogo nativo, la red social hace el resto.
+    $shareUrl   = rawurlencode($canonicalUrl);
+    $shareTitle = rawurlencode($article['title']);
+    ?>
+    <div class="arf-article__share">
+        <span class="arf-article__share-label">Compartir:</span>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareUrl ?>" target="_blank" rel="noopener noreferrer" aria-label="Compartir en Facebook">Facebook</a>
+        <a href="https://api.whatsapp.com/send?text=<?= $shareTitle ?>%20<?= $shareUrl ?>" target="_blank" rel="noopener noreferrer" aria-label="Compartir en WhatsApp">WhatsApp</a>
+        <a href="https://twitter.com/intent/tweet?url=<?= $shareUrl ?>&amp;text=<?= $shareTitle ?>" target="_blank" rel="noopener noreferrer" aria-label="Compartir en X (Twitter)">X</a>
+    </div>
+
     <?php if (!$isFallback): ?>
         <div class="arf-article__media">
             <img src="<?= htmlspecialchars($heroImage, ENT_QUOTES, 'UTF-8') ?>"

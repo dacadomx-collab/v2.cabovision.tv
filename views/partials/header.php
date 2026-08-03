@@ -266,6 +266,14 @@
                 <span></span>
                 <span></span>
                 <ul id="menu">
+                    <li>
+                        <form class="header-search header-search--mobile" action="<?= base_path() ?>/buscar.php" method="get" role="search">
+                            <input type="search" name="q" placeholder="Buscar…" aria-label="Buscar noticias" minlength="2" required>
+                            <button type="submit" aria-label="Buscar">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                            </button>
+                        </form>
+                    </li>
                     <li><a href="<?= base_path() ?>/index.php">Portada</a></li>
                     <li><a href="<?= base_path() ?>/candidatos.php">Candidatos</a></li>
                     <?php foreach ($mainMenuCurated as $entry): ?>
@@ -361,6 +369,14 @@
                     <?php endif; ?>
                 </ul>
                 <ul class="navbar-nav main-menu__aside">
+                    <li class="nav-item search-top">
+                        <form class="header-search" action="<?= base_path() ?>/buscar.php" method="get" role="search">
+                            <input type="search" name="q" placeholder="Buscar…" aria-label="Buscar noticias" minlength="2" required>
+                            <button type="submit" aria-label="Buscar">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                            </button>
+                        </form>
+                    </li>
                     <li class="nav-item social-top">
                         <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Cambiar modo día/noche">
                             <!-- SVG inline en vez de glifos Unicode ☀/☾ (2026-07-21): esos

@@ -7,11 +7,20 @@
             <div class="newsletter-box">
                 <h2>Suscríbete</h2>
                 <p>Recibe en tu correo las últimas noticias de Los Cabos y Baja California Sur.</p>
-                <form class="newsletter-box__form" onsubmit="return false;">
-                    <input type="email" placeholder="Correo electrónico" aria-label="Correo electrónico" disabled>
-                    <button type="submit" disabled>Suscribirme</button>
+                <!--
+                    Mismo Mailchimp list ya usado por el sistema legacy
+                    (u=f56aedc7c2009bc915b22277c, id=455b913276) — se reutiliza
+                    a propósito para no perder a los suscriptores existentes ni
+                    duplicar listas. El honeypot oculto (b_...) es requisito del
+                    propio Mailchimp para descartar bots, no algo nuestro.
+                -->
+                <form class="newsletter-box__form" action="https://cabovision.us1.list-manage.com/subscribe/post?u=f56aedc7c2009bc915b22277c&amp;id=455b913276" method="post" target="_blank" novalidate>
+                    <input type="email" name="EMAIL" placeholder="Correo electrónico" aria-label="Correo electrónico" required>
+                    <div aria-hidden="true" style="position:absolute;left:-5000px;">
+                        <input type="text" name="b_f56aedc7c2009bc915b22277c_455b913276" tabindex="-1" value="">
+                    </div>
+                    <button type="submit">Suscribirme</button>
                 </form>
-                <p class="newsletter-box__note">Muy pronto podrás suscribirte desde aquí.</p>
             </div>
 
             <nav aria-label="Enlaces de pie de página">
